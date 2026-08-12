@@ -20,6 +20,16 @@ See [BUILD.md](BUILD.md). Use **ESP-IDF v5.1.6** and `idf.py set-target esp32`.
 - Optional: the 4" shield, seated, DIPs not on ICSP
 - Not yet: a CAN transceiver (#3A)
 
+## OpenLCB node ID
+
+OwlThree is listed in the [OpenLCB unique ID registry](https://registry.openlcb.org/uniqueidranges) as:
+
+**05.01.01.01.A5.*** — 256 IDs (`05.01.01.01.A5.00` … `05.01.01.01.A5.FF`)
+
+This firmware defaults to **05.01.01.01.A5.01** (this D1 R32 WiFi node). Change it in `idf.py menuconfig` → *D1 R32 OpenMRN WiFi node*. Keep `.02` and up for more boards or the later CAN node.
+
+Do not use the `03.00.AB.01.*` values from the registry comment as the node ID. The assigned range is the `05.01.01.01.A5.*` row.
+
 ## Status
 
 Scaffold: OpenMRNIDF submodule, IDF project, NVS/netif init, hub host/port Kconfig. Next: `Esp32WiFiManager` + OpenMRN stack attached to the hub.

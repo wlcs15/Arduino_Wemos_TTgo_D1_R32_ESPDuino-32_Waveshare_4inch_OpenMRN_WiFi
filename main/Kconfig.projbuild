@@ -1,5 +1,13 @@
 menu "D1 R32 OpenMRN WiFi node"
 
+    config NODE_OPENLCB_ID
+        hex "OpenLCB unique node ID (48-bit)"
+        default 0x05010101A501
+        help
+            OwlThree registry range is 05.01.01.01.A5.* (256 IDs).
+            Default .01 is this Wemos WiFi node. Use .02+ for more boards.
+            Do not use 00.00.00.00.00.00 or anyone else's prefix.
+
     config NODE_WIFI_SSID
         string "WiFi SSID"
         default ""

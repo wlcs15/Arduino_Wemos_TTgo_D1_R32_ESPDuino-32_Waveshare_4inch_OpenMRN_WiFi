@@ -27,6 +27,16 @@ extern "C" void app_main(void)
     ESP_ERROR_CHECK(esp_netif_init());
     ESP_ERROR_CHECK(esp_event_loop_create_default());
 
+    const uint64_t node_id = CONFIG_NODE_OPENLCB_ID;
+    ESP_LOGI(TAG,
+             "OpenLCB node ID %02X.%02X.%02X.%02X.%02X.%02X",
+             (unsigned)((node_id >> 40) & 0xFF),
+             (unsigned)((node_id >> 32) & 0xFF),
+             (unsigned)((node_id >> 24) & 0xFF),
+             (unsigned)((node_id >> 16) & 0xFF),
+             (unsigned)((node_id >> 8) & 0xFF),
+             (unsigned)(node_id & 0xFF));
+
     ESP_LOGI(TAG, "NVS and netif ready. Hub defaults: %s:%d",
              CONFIG_NODE_LCC_HUB_HOST, CONFIG_NODE_LCC_HUB_PORT);
     ESP_LOGI(TAG, "Next: wire Esp32WiFiManager + SimpleStack to the JMRI hub.");
