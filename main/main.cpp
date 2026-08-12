@@ -60,6 +60,9 @@ extern "C" void app_main(void)
     {
         ESP_LOGW(TAG, "WiFi PSK not available (%s)", esp_err_to_name(err));
     }
+#if DEBUG
+    debug_ids_show_psk_status(err == ESP_OK);
+#endif
     memset(psk, 0, sizeof(psk));
 
     ESP_LOGI(TAG, "Next: wire Esp32WiFiManager + SimpleStack to the CS-105 hub.");
