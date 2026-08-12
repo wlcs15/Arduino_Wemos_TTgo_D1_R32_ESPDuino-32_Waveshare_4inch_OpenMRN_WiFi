@@ -1,0 +1,2 @@
+## Application component. OpenMRNIDF is a local submodule, not a registry dep.
+dependencies: {}

@@ -1,0 +1,24 @@
+menu "D1 R32 OpenMRN WiFi node"
+
+    config NODE_WIFI_SSID
+        string "WiFi SSID"
+        default ""
+        help
+            Station SSID. Leave empty until you are ready to join a network.
+
+    config NODE_WIFI_PASSWORD
+        string "WiFi password"
+        default ""
+
+    config NODE_LCC_HUB_HOST
+        string "JMRI / OpenLCB GridConnect hub hostname or IP"
+        default "192.168.1.10"
+        help
+            Host running JMRI Start Hub (or another GridConnect TCP server).
+
+    config NODE_LCC_HUB_PORT
+        int "GridConnect TCP port"
+        default 12021
+        range 1 65535
+
+endmenu

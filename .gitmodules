@@ -1,0 +1,3 @@
+[submodule "components/OpenMRNIDF"]
+	path = components/OpenMRNIDF
+	url = https://github.com/atanisoft/OpenMRNIDF.git
