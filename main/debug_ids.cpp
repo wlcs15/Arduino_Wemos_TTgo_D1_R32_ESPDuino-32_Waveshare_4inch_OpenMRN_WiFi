@@ -56,11 +56,11 @@ esp_err_t debug_ids_show(void)
     const uint16_t white = 0xFFFF;
     const uint16_t black = 0x0000;
     const uint16_t yellow = 0xFFE0;
-    ili9486_draw_text(8, 16, "MAC ADDRESS", yellow, black, 2);
+    ili9486_draw_text(8, 16, "MAC ADDRESS:", yellow, black, 2);
     ili9486_draw_text(8, 48, mac_s, white, black, 2);
-    ili9486_draw_text(8, 96, "OPENLCB NODE ID", yellow, black, 2);
+    ili9486_draw_text(8, 96, "OPENLCB NODE ID:", yellow, black, 2);
     ili9486_draw_text(8, 128, node_s, white, black, 2);
-    ili9486_draw_text(8, 176, "SPI FLASH UNIQUE ID", yellow, black, 2);
+    ili9486_draw_text(8, 176, "SPI FLASH UNIQUE ID:", yellow, black, 2);
     ili9486_draw_text(8, 208, uid_s, white, black, 2);
     s_panel_ok = true;
     return ESP_OK;
@@ -84,7 +84,7 @@ void debug_ids_show_psk_status(bool psk_ready)
     const uint16_t yellow = 0xFFE0;
     const uint16_t red = 0xF800;
     const uint16_t green = 0x07E0;
-    ili9486_draw_text(8, 256, "WIFI PASSWORD", yellow, black, 2);
+    ili9486_draw_text(8, 256, "WIFI PASSWORD:", yellow, black, 2);
     if (psk_ready)
     {
         ili9486_draw_text(8, 288, "SET (NOT SHOWN)", green, black, 2);
