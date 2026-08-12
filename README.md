@@ -41,7 +41,7 @@ Do not use the `03.00.AB.01.*` values from the registry comment as the node ID. 
 - Step 1: flash a `DEBUG=1` image with `./utils/build_idf5.sh` (Grok can do this). Serial + glass show MAC, OpenLCB node ID, and SPI flash unique ID.
 - Step 2: `./utils/collect_hw_ids.py --port /dev/ttyUSB0` writes those three values to gitignored `local/hw_ids.env`.
 - Step 3: in **your** terminal, `./utils/provision_wifi_build.sh` (hidden prompt). The host encrypts with the same HKDF + AES-256-GCM as the firmware; only ciphertext is baked into `main/wifi_psk_wrap.inc` (gitignored).
-- First boot of that image decrypts with **live** chip IDs and stores the wrap in **NVS**. Later `./utils/build_idf5.sh` flashes keep NVS. Do not `erase-flash`.
+- First boot of that image decrypts with **live** chip IDs and stores the wrap in **NVS**. Later `./utils/build_idf5.sh` flashes keep NVS. To wipe the chip and the host wrap: `./utils/erase_all_flash.sh`.
 - Wrap key = HKDF-SHA256(flash unique id ∥ MAC ∥ node). The ID files plus the ciphertext can reconstruct the PSK; they stay local and out of git. This is “not plaintext in the .bin,” not dump-proof.
 
 ## Status

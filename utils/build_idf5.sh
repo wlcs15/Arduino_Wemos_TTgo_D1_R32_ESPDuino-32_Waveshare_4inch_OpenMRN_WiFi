@@ -10,6 +10,9 @@
 #   ./utils/provision_wifi_build.sh
 #   ./utils/provision_wifi_build.sh -p /dev/ttyUSB0 flash
 #
+# Wipe chip + host wrap (the secret):
+#   ./utils/erase_all_flash.sh -p /dev/ttyUSB0
+#
 # Do not pass the Wi-Fi password on this command line.
 set -euo pipefail
 

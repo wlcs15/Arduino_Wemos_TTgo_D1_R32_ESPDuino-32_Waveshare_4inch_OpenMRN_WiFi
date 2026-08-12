@@ -37,7 +37,15 @@ Grok and any non-interactive build use `utils/build_idf5.sh`. That script never 
 ./utils/provision_wifi_build.sh -p /dev/ttyUSB0 flash
 ```
 
-`provision_wifi_build.sh` refuses a non-TTY, being sourced, a pre-set `WIFI_PASSWORD`, or `--password`. It writes only `main/wifi_psk_wrap.inc` (ciphertext, gitignored). The firmware decrypts with **live** chip IDs and copies the wrap into NVS. Later `./utils/build_idf5.sh` flashes keep NVS. **Do not** `erase-flash` unless you intend to provision again.
+`provision_wifi_build.sh` refuses a non-TTY, being sourced, a pre-set `WIFI_PASSWORD`, or `--password`. It writes only `main/wifi_psk_wrap.inc` (ciphertext, gitignored). The firmware decrypts with **live** chip IDs and copies the wrap into NVS. Later `./utils/build_idf5.sh` flashes keep NVS.
+
+To wipe the chip **and** the host wrap (the secret):
+
+```bash
+./utils/erase_all_flash.sh -p /dev/ttyUSB0
+```
+
+That is a full `erase-flash` (app + NVS) plus deletion of `main/wifi_psk_wrap.inc`. Afterward flash a wrap-free image and provision again if you want Wi-Fi.
 
 Fake-data check (no hardware, no real PSK):
 
