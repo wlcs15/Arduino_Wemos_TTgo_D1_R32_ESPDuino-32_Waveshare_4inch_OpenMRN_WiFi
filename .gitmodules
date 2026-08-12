@@ -1,4 +1,4 @@
 [submodule "components/OpenMRNIDF"]
 	path = components/OpenMRNIDF
-	url = https://github.com/atanisoft/OpenMRNIDF.git
-	branch = 5.1.0
+	url = https://github.com/wlcs15/Arduino_Wemos_TTgo_D1_R32_ESPDuino-32_Waveshare_4inch_OpenMRN_WiFi.git
+	branch = vendor/OpenMRNIDF-5.1.0

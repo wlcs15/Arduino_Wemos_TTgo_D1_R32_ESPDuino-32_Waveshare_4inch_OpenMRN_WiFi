@@ -17,7 +17,7 @@ This phase is **Wi-Fi STA + DEBUG bring-up** (no TWAI/CAN, OpenMRN GridConnect n
 ## License
 
 Application code in this repository is **BSD-2-Clause** (see `LICENSE`).  
-`components/OpenMRNIDF` is a submodule of [atanisoft/OpenMRNIDF](https://github.com/atanisoft/OpenMRNIDF) and remains BSD-2-Clause.
+`components/OpenMRNIDF` is atanisoft’s **5.1.0** tree plus a one-line `mdns` REQUIRES for IDF 5.1. The commit lives on this repo’s `vendor/OpenMRNIDF-5.1.0` branch (not pushed to atanisoft). License remains BSD-2-Clause.
 
 ## Build
 

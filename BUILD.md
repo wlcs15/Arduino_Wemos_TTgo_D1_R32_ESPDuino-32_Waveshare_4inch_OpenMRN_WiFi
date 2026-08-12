@@ -70,13 +70,13 @@ chmod +x utils/build_idf5.sh utils/provision_wifi_build.sh
 
 ## Submodules
 
-| Path | Upstream | License |
-|------|----------|---------|
-| `components/OpenMRNIDF` | https://github.com/atanisoft/OpenMRNIDF | BSD-2-Clause |
+| Path | Source | License |
+|------|--------|---------|
+| `components/OpenMRNIDF` | atanisoft **5.1.0** + mdns REQUIRES, published as `vendor/OpenMRNIDF-5.1.0` on this repo | BSD-2-Clause |
 
-Application code in this repo is BSD-2-Clause (see `LICENSE`). Do not vendor a second copy of OpenMRN.
+Application code in this repo is BSD-2-Clause (see `LICENSE`). Do not vendor a second copy of OpenMRN sources.
 
-`components/OpenMRNIDF` tracks atanisoft’s **5.1.0** branch (ESP-IDF v5.1.x). CMake applies `patches/OpenMRNIDF-idf51-mdns.patch` so the component REQUIRES the registry `mdns` package. That one-line edit stays local. Do not push it to atanisoft.
+The submodule URL is this project repo (branch `vendor/OpenMRNIDF-5.1.0`) so the mdns CMake commit is fetchable. CMake still applies `patches/OpenMRNIDF-idf51-mdns.patch` if a clean upstream checkout is missing that line.
 
 ## DEBUG ID screen
 
