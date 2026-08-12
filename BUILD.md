@@ -18,15 +18,26 @@ Confirm:
 idf.py --version    # must show v5.1.6
 ```
 
+## Wi-Fi secrets (do not commit, do not paste in chat)
+
+```bash
+cd ~/Git/wlcs15/Arduino_Wemos_TTgo_D1_R32_ESPDuino-32_Waveshare_4inch_OpenMRN_WiFi
+cp wifi_secrets.env.example wifi_secrets.env
+# edit wifi_secrets.env locally — it is gitignored
+chmod 600 wifi_secrets.env
+```
+
+Leave Kconfig SSID/password empty. The build script injects the env file at compile time and never prints the values.
+
 ## First configure and build
 
 ```bash
 cd ~/Git/wlcs15/Arduino_Wemos_TTgo_D1_R32_ESPDuino-32_Waveshare_4inch_OpenMRN_WiFi
 git submodule update --init --recursive
-idf.py set-target esp32
-idf.py menuconfig   # optional: WiFi SSID; hub is CS-105 192.168.1.27:12021
-idf.py build
-idf.py -p /dev/ttyUSB0 flash monitor
+chmod +x utils/build_idf5.sh
+./utils/build_idf5.sh set-target esp32
+./utils/build_idf5.sh build
+./utils/build_idf5.sh -p /dev/ttyUSB0 flash monitor
 ```
 
 ## Submodules

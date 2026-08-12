@@ -8,3 +8,16 @@ idf_component_register(
         esp_wifi
         OpenMRNIDF
 )
+
+# Compile-time secrets from the environment (utils/build_idf5.sh).
+# Never log or commit these values. CMakeCache.txt is gitignored.
+if(DEFINED ENV{WIFI_SSID} AND NOT "$ENV{WIFI_SSID}" STREQUAL "")
+    target_compile_definitions(${COMPONENT_LIB} PRIVATE
+        "WIFI_SSID_FROM_ENV=\"$ENV{WIFI_SSID}\""
+    )
+endif()
+if(DEFINED ENV{WIFI_PASSWORD} AND NOT "$ENV{WIFI_PASSWORD}" STREQUAL "")
+    target_compile_definitions(${COMPONENT_LIB} PRIVATE
+        "WIFI_PASSWORD_FROM_ENV=\"$ENV{WIFI_PASSWORD}\""
+    )
+endif()

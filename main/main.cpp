@@ -2,6 +2,7 @@
 // No TWAI/CAN and no ILI9486 UI in this step.
 
 #include <stdio.h>
+#include <string.h>
 
 #include "esp_event.h"
 #include "esp_log.h"
@@ -9,6 +10,22 @@
 #include "nvs_flash.h"
 
 static const char *TAG = "d1r32_openmrn_wifi";
+
+#if defined(WIFI_SSID_FROM_ENV) && defined(WIFI_PASSWORD_FROM_ENV)
+static const char *kWifiSsid = WIFI_SSID_FROM_ENV;
+static const char *kWifiPassword = WIFI_PASSWORD_FROM_ENV;
+static const bool kWifiFromEnv = true;
+#else
+static const char *kWifiSsid = CONFIG_NODE_WIFI_SSID;
+static const char *kWifiPassword = CONFIG_NODE_WIFI_PASSWORD;
+static const bool kWifiFromEnv = false;
+#endif
+
+static bool wifi_creds_ready(void)
+{
+    return kWifiSsid != nullptr && kWifiSsid[0] != '\0' &&
+           kWifiPassword != nullptr && kWifiPassword[0] != '\0';
+}
 
 extern "C" void app_main(void)
 {
@@ -41,5 +58,17 @@ extern "C" void app_main(void)
              CONFIG_NODE_LCC_HUB_HOST, CONFIG_NODE_LCC_HUB_PORT);
     ESP_LOGI(TAG, "JMRI monitor (Pi) %s:%d — connect JMRI to the CS-105, not as a second hub",
              CONFIG_NODE_JMRI_MONITOR_HOST, CONFIG_NODE_JMRI_MONITOR_PORT);
+    if (wifi_creds_ready())
+    {
+        ESP_LOGI(TAG, "WiFi credentials present (%s, SSID length %u) — not printed",
+                 kWifiFromEnv ? "wifi_secrets.env" : "Kconfig",
+                 (unsigned)strlen(kWifiSsid));
+    }
+    else
+    {
+        ESP_LOGW(TAG, "WiFi credentials empty. Copy wifi_secrets.env.example and use utils/build_idf5.sh");
+    }
+    (void)kWifiPassword;
+
     ESP_LOGI(TAG, "Next: wire Esp32WiFiManager + SimpleStack to the CS-105 hub.");
 }
