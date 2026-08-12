@@ -66,15 +66,22 @@ esp_err_t debug_ids_show(void)
     return ESP_OK;
 }
 
-void debug_ids_show_psk_status(bool psk_ready)
+void debug_ids_show_psk_status(esp_err_t load_err)
 {
-    if (psk_ready)
+    const char *line = "NOT SET";
+    if (load_err == ESP_OK)
     {
+        line = "SET (NOT SHOWN)";
         ESP_LOGI(TAG, "WiFi password: set (not logged)");
+    }
+    else if (load_err == ESP_ERR_NOT_FOUND)
+    {
+        ESP_LOGW(TAG, "WiFi password: NOT SET");
     }
     else
     {
-        ESP_LOGW(TAG, "WiFi password: NOT SET");
+        line = "UNWRAP FAIL";
+        ESP_LOGE(TAG, "WiFi password: unwrap failed (%s)", esp_err_to_name(load_err));
     }
     if (!s_panel_ok)
     {
@@ -84,15 +91,9 @@ void debug_ids_show_psk_status(bool psk_ready)
     const uint16_t yellow = 0xFFE0;
     const uint16_t red = 0xF800;
     const uint16_t green = 0x07E0;
+    const uint16_t color = (load_err == ESP_OK) ? green : red;
     ili9486_draw_text(8, 256, "WIFI PASSWORD:", yellow, black, 2);
-    if (psk_ready)
-    {
-        ili9486_draw_text(8, 288, "SET (NOT SHOWN)", green, black, 2);
-    }
-    else
-    {
-        ili9486_draw_text(8, 288, "NOT SET", red, black, 2);
-    }
+    ili9486_draw_text(8, 288, line, color, black, 2);
 }
 
 #endif

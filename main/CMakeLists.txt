@@ -4,6 +4,7 @@ idf_component_register(
         "wifi_cred.cpp"
         "ili9486_min.cpp"
         "debug_ids.cpp"
+        "wifi_sta.cpp"
     INCLUDE_DIRS "."
     REQUIRES
         nvs_flash

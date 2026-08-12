@@ -8,6 +8,7 @@
 #include "driver/spi_master.h"
 #include "esp_rom_sys.h"
 #include "freertos/FreeRTOS.h"
+#include "freertos/semphr.h"
 #include "freertos/task.h"
 
 static const gpio_num_t PIN_CS = GPIO_NUM_5;
@@ -22,6 +23,23 @@ static const int kWidth = 480;
 static const int kHeight = 320;
 
 static spi_device_handle_t s_spi;
+static SemaphoreHandle_t s_lock;
+
+static void lock_bus(void)
+{
+    if (s_lock)
+    {
+        xSemaphoreTakeRecursive(s_lock, portMAX_DELAY);
+    }
+}
+
+static void unlock_bus(void)
+{
+    if (s_lock)
+    {
+        xSemaphoreGiveRecursive(s_lock);
+    }
+}
 
 static void wr16(uint16_t v)
 {
@@ -67,6 +85,10 @@ static void set_window(int x, int y, int w, int h)
 
 esp_err_t ili9486_init(void)
 {
+    if (s_lock == nullptr)
+    {
+        s_lock = xSemaphoreCreateRecursiveMutex();
+    }
     gpio_config_t io = {};
     io.mode = GPIO_MODE_OUTPUT;
     io.pin_bit_mask = (1ULL << PIN_CS) | (1ULL << PIN_DC) | (1ULL << PIN_RST) | (1ULL << PIN_BL);
@@ -128,8 +150,71 @@ esp_err_t ili9486_init(void)
     return ESP_OK;
 }
 
+void ili9486_fill_rect(int x, int y, int w, int h, uint16_t color)
+{
+    if (s_spi == nullptr || w <= 0 || h <= 0)
+    {
+        return;
+    }
+    lock_bus();
+    set_window(x, y, w, h);
+    cmd(0x2C);
+    gpio_set_level(PIN_DC, 1);
+    uint32_t n = (uint32_t)w * (uint32_t)h;
+    while (n--)
+    {
+        wr16(color);
+    }
+    unlock_bus();
+}
+
+void ili9486_draw_wifi_icon(ili9486_wifi_icon_t state)
+{
+    const int x0 = kWidth - 36;
+    const int y0 = 6;
+    const uint16_t black = 0x0000;
+    const uint16_t dim = 0x4208;
+    const uint16_t yellow = 0xFFE0;
+    const uint16_t green = 0x07E0;
+    const uint16_t red = 0xF800;
+    uint16_t c = dim;
+    if (state == ILI9486_WIFI_ICON_SEARCH)
+    {
+        c = yellow;
+    }
+    else if (state == ILI9486_WIFI_ICON_OK)
+    {
+        c = green;
+    }
+    else if (state == ILI9486_WIFI_ICON_FAIL)
+    {
+        c = red;
+    }
+    ili9486_fill_rect(x0, y0, 32, 28, black);
+    if (state == ILI9486_WIFI_ICON_OFF)
+    {
+        ili9486_fill_rect(x0 + 14, y0 + 22, 4, 4, dim);
+        return;
+    }
+    if (state == ILI9486_WIFI_ICON_FAIL)
+    {
+        ili9486_fill_rect(x0 + 6, y0 + 10, 20, 3, red);
+        ili9486_fill_rect(x0 + 14, y0 + 4, 3, 16, red);
+        return;
+    }
+    // Three rising bars. Searching lights only the lowest bar.
+    ili9486_fill_rect(x0 + 4, y0 + 20, 6, 6, c);
+    if (state == ILI9486_WIFI_ICON_OK || state == ILI9486_WIFI_ICON_SEARCH)
+    {
+        const uint16_t mid = (state == ILI9486_WIFI_ICON_OK) ? c : dim;
+        ili9486_fill_rect(x0 + 13, y0 + 12, 6, 14, mid);
+        ili9486_fill_rect(x0 + 22, y0 + 4, 6, 22, (state == ILI9486_WIFI_ICON_OK) ? c : dim);
+    }
+}
+
 void ili9486_fill(uint16_t color)
 {
+    lock_bus();
     set_window(0, 0, kWidth, kHeight);
     cmd(0x2C);
     gpio_set_level(PIN_DC, 1);
@@ -149,6 +234,7 @@ void ili9486_fill(uint16_t color)
         (void)spi_device_polling_transmit(s_spi, &t);
         left -= n;
     }
+    unlock_bus();
 }
 
 static const uint8_t *glyph(char c)
@@ -171,6 +257,7 @@ void ili9486_draw_text(int x, int y, const char *s, uint16_t fg, uint16_t bg, in
     {
         scale = 1;
     }
+    lock_bus();
     for (; *s; ++s)
     {
         const uint8_t *g = glyph(*s);
@@ -193,4 +280,5 @@ void ili9486_draw_text(int x, int y, const char *s, uint16_t fg, uint16_t bg, in
         }
         x += 8 * scale;
     }
+    unlock_bus();
 }

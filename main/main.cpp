@@ -8,15 +8,17 @@
 #include "esp_log.h"
 #include "esp_netif.h"
 #include "debug_ids.h"
+#include "ili9486_min.h"
 #include "nvs_flash.h"
 #include "wifi_cred.h"
+#include "wifi_sta.h"
 
 static const char *TAG = "d1r32_openmrn_wifi";
 
 extern "C" void app_main(void)
 {
     ESP_LOGI(TAG, "Arduino_Wemos_TTgo_D1_R32_ESPDuino-32_Waveshare_4inch_OpenMRN_WiFi");
-    ESP_LOGI(TAG, "Phase: WiFi GridConnect scaffold (no CAN). DEBUG IDs on ILI9486.");
+    ESP_LOGI(TAG, "Phase: WiFi STA + DEBUG IDs (no CAN / no OpenMRN hub yet).");
     ESP_LOGI(TAG, "OpenMRNIDF is a git submodule under components/OpenMRNIDF");
     ESP_LOGI(TAG, "Required ESP-IDF: v5.1.6  target: esp32");
 
@@ -61,9 +63,33 @@ extern "C" void app_main(void)
         ESP_LOGW(TAG, "WiFi PSK not available (%s)", esp_err_to_name(err));
     }
 #if DEBUG
-    debug_ids_show_psk_status(err == ESP_OK);
+    debug_ids_show_psk_status(err);
 #endif
-    memset(psk, 0, sizeof(psk));
+    if (err == ESP_OK)
+    {
+        const esp_err_t werr = wifi_sta_start(ssid, psk);
+        memset(psk, 0, sizeof(psk));
+        if (werr == ESP_OK)
+        {
+            const wifi_sta_state_t st = wifi_sta_wait(20000);
+            if (st == WIFI_STA_CONNECTED)
+            {
+                ESP_LOGI(TAG, "WiFi link up ip=%s rssi=%d", wifi_sta_ip(), wifi_sta_rssi());
+            }
+            else
+            {
+                ESP_LOGW(TAG, "WiFi not associated (%s)", wifi_sta_state_name(st));
+            }
+        }
+    }
+    else
+    {
+        memset(psk, 0, sizeof(psk));
+#if DEBUG
+        ili9486_draw_wifi_icon(ILI9486_WIFI_ICON_OFF);
+#endif
+        ESP_LOGW(TAG, "WiFi radio not started (no usable PSK)");
+    }
 
-    ESP_LOGI(TAG, "Next: wire Esp32WiFiManager + SimpleStack to the CS-105 hub.");
+    ESP_LOGI(TAG, "Next: attach OpenMRN / Esp32WiFiManager GridConnect to the CS-105 hub.");
 }
