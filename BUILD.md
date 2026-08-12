@@ -27,7 +27,11 @@ cp wifi_secrets.env.example wifi_secrets.env
 chmod 600 wifi_secrets.env
 ```
 
-Leave Kconfig SSID/password empty. The build script injects the env file at compile time and never prints the values.
+SSID default is `SRIF2333` (public). Put the **PSK only** in `wifi_secrets.env`.
+
+First boot with that build wraps the PSK into NVS using AES-256-GCM. Later `./utils/build_idf5.sh flash` keeps NVS. **Do not** `erase-flash` unless you intend to provision again.
+
+The wrap key is HKDF-SHA256 of this module’s flash unique id + MAC, mixed with OwlThree prefix `05.01.01.01.A5`. That is not plaintext in git; it is not Flash Encryption.
 
 ## First configure and build
 

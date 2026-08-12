@@ -8,6 +8,7 @@
 #include "esp_log.h"
 #include "esp_netif.h"
 #include "nvs_flash.h"
+#include "wifi_cred.h"
 
 static const char *TAG = "d1r32_openmrn_wifi";
 
@@ -58,17 +59,23 @@ extern "C" void app_main(void)
              CONFIG_NODE_LCC_HUB_HOST, CONFIG_NODE_LCC_HUB_PORT);
     ESP_LOGI(TAG, "JMRI monitor (Pi) %s:%d — connect JMRI to the CS-105, not as a second hub",
              CONFIG_NODE_JMRI_MONITOR_HOST, CONFIG_NODE_JMRI_MONITOR_PORT);
-    if (wifi_creds_ready())
+    char ssid[33] = {};
+    char psk[65] = {};
+    err = wifi_cred_load(ssid, sizeof(ssid), psk, sizeof(psk));
+    if (err == ESP_OK)
     {
-        ESP_LOGI(TAG, "WiFi credentials present (%s, SSID length %u) — not printed",
-                 kWifiFromEnv ? "wifi_secrets.env" : "Kconfig",
-                 (unsigned)strlen(kWifiSsid));
+        ESP_LOGI(TAG, "WiFi SSID ready (%u chars). PSK unwrapped, not logged.",
+                 (unsigned)strlen(ssid));
     }
     else
     {
-        ESP_LOGW(TAG, "WiFi credentials empty. Copy wifi_secrets.env.example and use utils/build_idf5.sh");
+        ESP_LOGW(TAG, "WiFi PSK not available (%s)", esp_err_to_name(err));
     }
+    memset(psk, 0, sizeof(psk));
+    (void)kWifiSsid;
     (void)kWifiPassword;
+    (void)kWifiFromEnv;
+    (void)wifi_creds_ready;
 
     ESP_LOGI(TAG, "Next: wire Esp32WiFiManager + SimpleStack to the CS-105 hub.");
 }

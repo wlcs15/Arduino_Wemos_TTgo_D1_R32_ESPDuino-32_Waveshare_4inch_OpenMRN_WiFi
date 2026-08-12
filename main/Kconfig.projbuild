@@ -9,14 +9,17 @@ menu "D1 R32 OpenMRN WiFi node"
             Do not use 00.00.00.00.00.00 or anyone else's prefix.
 
     config NODE_WIFI_SSID
-        string "WiFi SSID"
-        default ""
+        string "WiFi SSID (not secret; PSK is not stored here)"
+        default "SRIF2333"
         help
-            Station SSID. Leave empty until you are ready to join a network.
+            House LCC SSID. The WPA password is never a Kconfig default.
 
     config NODE_WIFI_PASSWORD
-        string "WiFi password"
+        string "WiFi password (leave empty — use wifi_secrets.env once)"
         default ""
+        help
+            Do not put the PSK here. Provision via wifi_secrets.env; it is
+            wrapped into NVS with AES-256-GCM.
 
     config NODE_LCC_HUB_HOST
         string "LCC GridConnect hub hostname or IP (CS-105)"

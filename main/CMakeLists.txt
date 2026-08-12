@@ -1,11 +1,13 @@
 idf_component_register(
-    SRCS "main.cpp"
+    SRCS "main.cpp" "wifi_cred.cpp"
     INCLUDE_DIRS "."
     REQUIRES
         nvs_flash
         esp_event
         esp_netif
         esp_wifi
+        spi_flash
+        mbedtls
         OpenMRNIDF
 )
 
