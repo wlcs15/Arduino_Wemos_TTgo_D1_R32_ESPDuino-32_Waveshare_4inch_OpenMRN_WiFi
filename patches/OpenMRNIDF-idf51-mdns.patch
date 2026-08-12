@@ -1,0 +1,14 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 1474a21..5bf3f43 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -24,7 +24,8 @@ set(IDF_DEPS
+     hal
+     heap
+     pthread
+-    vfs)
++    vfs
++    mdns)
+ 
+ idf_component_register(SRC_DIRS "${SOURCE_DIRS}"
+                        INCLUDE_DIRS "src"

@@ -52,7 +52,7 @@ chmod +x utils/build_idf5.sh
 
 Application code in this repo is BSD-2-Clause (see `LICENSE`). Do not vendor a second copy of OpenMRN.
 
-CMake at configure time applies `patches/OpenMRNIDF-idf51-wifi-only.patch` to the submodule: add `esp_wifi`/`pthread`, exclude `Esp32Ledc.cpp` and `Esp32HardwareTwai.cpp` (this phase is WiFi-only; IDF 5.1 TWAI HAL needs a config the snapshot does not pass), and silence format-as-error. Those edits stay local. Do not push them to atanisoft.
+`components/OpenMRNIDF` tracks atanisoft’s **5.1.0** branch (ESP-IDF v5.1.x). CMake applies `patches/OpenMRNIDF-idf51-mdns.patch` so the component REQUIRES the registry `mdns` package. That one-line edit stays local. Do not push it to atanisoft.
 
 ## DEBUG ID screen
 

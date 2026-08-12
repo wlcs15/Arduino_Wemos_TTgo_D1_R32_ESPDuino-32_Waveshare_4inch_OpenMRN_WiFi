@@ -32,9 +32,9 @@ fi
 # shellcheck disable=SC1091
 source "${IDF_PATH}/export.sh"
 
-# Same overlay CMake applies: IDF 5.1 + WiFi-only excludes.
-PATCH="$ROOT/patches/OpenMRNIDF-idf51-wifi-only.patch"
-if [[ -f "$PATCH" ]] && ! grep -q 'Esp32HardwareTwai.cpp' "$ROOT/components/OpenMRNIDF/CMakeLists.txt"; then
+# Same overlay CMake applies: add registry mdns to OpenMRNIDF REQUIRES.
+PATCH="$ROOT/patches/OpenMRNIDF-idf51-mdns.patch"
+if [[ -f "$PATCH" ]] && ! grep -qE '^[[:space:]]+mdns\)' "$ROOT/components/OpenMRNIDF/CMakeLists.txt"; then
     git -C "$ROOT/components/OpenMRNIDF" apply "$PATCH"
 fi
 
