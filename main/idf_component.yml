@@ -1,2 +1,3 @@
-## Application component. OpenMRNIDF is a local submodule, not a registry dep.
-dependencies: {}
+## OpenMRNIDF requires mdns (moved to the ESP-IDF component registry in 5.1).
+dependencies:
+  espressif/mdns: "*"

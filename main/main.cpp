@@ -32,7 +32,7 @@ static bool wifi_creds_ready(void)
 extern "C" void app_main(void)
 {
     ESP_LOGI(TAG, "Arduino_Wemos_TTgo_D1_R32_ESPDuino-32_Waveshare_4inch_OpenMRN_WiFi");
-    ESP_LOGI(TAG, "Phase: WiFi GridConnect scaffold (no CAN, no display driver)");
+    ESP_LOGI(TAG, "Phase: WiFi GridConnect scaffold (no CAN). DEBUG IDs on ILI9486.");
     ESP_LOGI(TAG, "OpenMRNIDF is a git submodule under components/OpenMRNIDF");
     ESP_LOGI(TAG, "Required ESP-IDF: v5.1.6  target: esp32");
 

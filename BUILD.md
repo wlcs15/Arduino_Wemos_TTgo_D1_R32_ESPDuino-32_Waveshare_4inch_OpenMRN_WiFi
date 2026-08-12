@@ -52,6 +52,12 @@ chmod +x utils/build_idf5.sh
 
 Application code in this repo is BSD-2-Clause (see `LICENSE`). Do not vendor a second copy of OpenMRN.
 
+CMake at configure time applies `patches/OpenMRNIDF-idf51-wifi-only.patch` to the submodule: add `esp_wifi`/`pthread`, exclude `Esp32Ledc.cpp` and `Esp32HardwareTwai.cpp` (this phase is WiFi-only; IDF 5.1 TWAI HAL needs a config the snapshot does not pass), and silence format-as-error. Those edits stay local. Do not push them to atanisoft.
+
+## DEBUG ID screen
+
+With `DEBUG=1` (default in `main/CMakeLists.txt`) boot paints MAC, OpenLCB node ID, and SPI flash unique ID on the 4" panel and prints the same three lines on serial. The Wi-Fi PSK is never displayed or logged.
+
 ## Hardware (this phase)
 
 - Wemos TTgo D1 R32 / ESPDuino-32

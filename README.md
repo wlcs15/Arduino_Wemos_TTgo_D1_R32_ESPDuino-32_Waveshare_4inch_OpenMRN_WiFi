@@ -2,7 +2,7 @@
 
 OpenMRN (NMRA LCC / OpenLCB) node for the **Wemos TTgo D1 R32 / ESPDuino-32** and the Coowell / Waveshare **4" ILI9486 resistive touch** Arduino shield.
 
-This phase is **WiFi GridConnect only**. There is no TWAI/CAN driver and no display driver yet. The shield may stay on the board; SPI DIP switches must be **D11 / D12 / D13** (this Wemos does not wire ICSP).
+This phase is **WiFi GridConnect only** (no TWAI/CAN). `#if DEBUG` paints MAC, OpenLCB node ID, and SPI flash unique ID on the 4" ILI9486 and logs the same three values on serial. The PSK is never shown. SPI DIP switches must be **D11 / D12 / D13** (this Wemos does not wire ICSP).
 
 ## License
 
@@ -44,4 +44,4 @@ Do not use the `03.00.AB.01.*` values from the registry comment as the node ID. 
 
 ## Status
 
-Scaffold: OpenMRNIDF submodule, IDF project, NVS/netif init, hub host/port Kconfig. Next: `Esp32WiFiManager` + OpenMRN stack attached to the hub.
+Scaffold: OpenMRNIDF submodule, IDF project, NVS/netif init, hub host/port Kconfig, DEBUG ILI9486 + serial ID dump. Next: `Esp32WiFiManager` + OpenMRN stack attached to the hub.
