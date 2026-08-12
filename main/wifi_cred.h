@@ -1,6 +1,8 @@
 #pragma once
 
+#include <stdbool.h>
 #include <stddef.h>
+#include <stdint.h>
 
 #include "esp_err.h"
 
@@ -11,6 +13,9 @@ extern "C" {
 // Load SSID + PSK from NVS (AES-256-GCM wrap). If NVS is empty and this
 // build was made with wifi_secrets.env, wrap once and store in NVS.
 esp_err_t wifi_cred_load(char *ssid, size_t ssid_len, char *psk, size_t psk_len);
+
+void wifi_hw_ids_read(uint8_t mac[6], uint8_t flash_uid[8], bool *uid_ok);
+uint64_t wifi_node_id(void);
 
 #ifdef __cplusplus
 }

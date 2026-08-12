@@ -1,5 +1,9 @@
 idf_component_register(
-    SRCS "main.cpp" "wifi_cred.cpp"
+    SRCS
+        "main.cpp"
+        "wifi_cred.cpp"
+        "ili9486_min.cpp"
+        "debug_ids.cpp"
     INCLUDE_DIRS "."
     REQUIRES
         nvs_flash
@@ -8,8 +12,12 @@ idf_component_register(
         esp_wifi
         spi_flash
         mbedtls
+        driver
         OpenMRNIDF
 )
+
+# Initial bring-up: DEBUG ID screen + serial. Turn off later with -DDEBUG=0.
+target_compile_definitions(${COMPONENT_LIB} PRIVATE DEBUG=1)
 
 # Compile-time secrets from the environment (utils/build_idf5.sh).
 # Never log or commit these values. CMakeCache.txt is gitignored.

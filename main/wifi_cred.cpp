@@ -54,13 +54,16 @@ static void get_mac(uint8_t mac[6])
     }
 }
 
-static void get_flash_uid(uint8_t uid[8])
+static void get_flash_uid(uint8_t uid[8], bool *ok)
 {
     uint64_t id = 0;
     if (esp_flash_read_unique_chip_id(NULL, &id) != ESP_OK || id == 0)
     {
-        ESP_LOGW(TAG, "flash unique id unavailable; wrap key uses MAC only");
         memset(uid, 0, 8);
+        if (ok)
+        {
+            *ok = false;
+        }
         return;
     }
     for (int i = 7; i >= 0; --i)
@@ -68,20 +71,47 @@ static void get_flash_uid(uint8_t uid[8])
         uid[i] = (uint8_t)(id & 0xFF);
         id >>= 8;
     }
+    if (ok)
+    {
+        *ok = true;
+    }
 }
 
-// IKM = flash_uid || MAC. Info = 05.01.01.01.A5 || MAC.
+void wifi_hw_ids_read(uint8_t mac[6], uint8_t flash_uid[8], bool *uid_ok)
+{
+    get_mac(mac);
+    get_flash_uid(flash_uid, uid_ok);
+}
+
+uint64_t wifi_node_id(void)
+{
+    return CONFIG_NODE_OPENLCB_ID;
+}
+
+// IKM = flash_uid || MAC || 05.01.01.01.A5.01
 static esp_err_t derive_wrap_key(uint8_t key[32])
 {
     uint8_t mac[6];
     uint8_t uid[8];
-    uint8_t ikm[14];
+    uint8_t ikm[20];
     uint8_t info[11];
+    bool uid_ok = false;
+    const uint64_t node = wifi_node_id();
 
     get_mac(mac);
-    get_flash_uid(uid);
+    get_flash_uid(uid, &uid_ok);
+    if (!uid_ok)
+    {
+        ESP_LOGW(TAG, "flash unique id unavailable; wrap key uses MAC + node ID");
+    }
     memcpy(ikm, uid, 8);
     memcpy(ikm + 8, mac, 6);
+    ikm[14] = (uint8_t)((node >> 40) & 0xFF);
+    ikm[15] = (uint8_t)((node >> 32) & 0xFF);
+    ikm[16] = (uint8_t)((node >> 24) & 0xFF);
+    ikm[17] = (uint8_t)((node >> 16) & 0xFF);
+    ikm[18] = (uint8_t)((node >> 8) & 0xFF);
+    ikm[19] = (uint8_t)(node & 0xFF);
     memcpy(info, kOwlThreePrefix, 5);
     memcpy(info + 5, mac, 6);
 

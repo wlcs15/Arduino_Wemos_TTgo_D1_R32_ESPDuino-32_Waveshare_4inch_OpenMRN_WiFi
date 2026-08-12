@@ -39,7 +39,7 @@ Do not use the `03.00.AB.01.*` values from the registry comment as the node ID. 
 - SSID **SRIF2333** (not secret).
 - PSK is your house password. It is **never** a git default.
 - First provision: local `wifi_secrets.env` + `utils/build_idf5.sh`. On first boot the PSK is wrapped with **AES-256-GCM** (mbedTLS in ESP-IDF) and stored in **NVS**. Later app flashes keep NVS.
-- Wrap key = HKDF-SHA256(flash unique chip id ∥ MAC, info = `05.01.01.01.A5` ∥ MAC). The OpenLCB **node ID stays `05.01.01.01.A5.01`** (only 6 bytes). The prefix is mixed into the wrap, not stuffed into the node ID.
+- Wrap key = HKDF-SHA256(flash unique id ∥ MAC ∥ `05.01.01.01.A5.01`). `#if DEBUG` shows MAC, Node ID, and flash UID on the 4" glass and on serial (never the PSK).
 - Flash unique id is preferred over MAC (MAC is on the air). If the flash chip has no UID, MAC is the fallback. This is “not plaintext,” not dump-proof.
 
 ## Status

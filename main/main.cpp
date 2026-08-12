@@ -7,6 +7,7 @@
 #include "esp_event.h"
 #include "esp_log.h"
 #include "esp_netif.h"
+#include "debug_ids.h"
 #include "nvs_flash.h"
 #include "wifi_cred.h"
 
@@ -59,6 +60,10 @@ extern "C" void app_main(void)
              CONFIG_NODE_LCC_HUB_HOST, CONFIG_NODE_LCC_HUB_PORT);
     ESP_LOGI(TAG, "JMRI monitor (Pi) %s:%d — connect JMRI to the CS-105, not as a second hub",
              CONFIG_NODE_JMRI_MONITOR_HOST, CONFIG_NODE_JMRI_MONITOR_PORT);
+
+#if DEBUG
+    (void)debug_ids_show();
+#endif
     char ssid[33] = {};
     char psk[65] = {};
     err = wifi_cred_load(ssid, sizeof(ssid), psk, sizeof(psk));
