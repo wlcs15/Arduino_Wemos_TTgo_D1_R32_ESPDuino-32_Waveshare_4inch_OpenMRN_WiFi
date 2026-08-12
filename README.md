@@ -16,9 +16,13 @@ See [BUILD.md](BUILD.md). Use **ESP-IDF v5.1.6** and `idf.py set-target esp32`.
 ## Hardware you need for this phase
 
 - D1 R32 (CH340, typically `/dev/ttyUSB0`)
-- Wi-Fi and a JMRI **Start Hub** (or other GridConnect TCP server) on port 12021
+- House Wi-Fi
+- **TCS CS-105** at `192.168.1.27` (GridConnect TCP **12021**) — this is the hub the node joins
+- **Raspberry Pi + JMRI** at `192.168.1.61` — second view only: configure JMRI’s OpenLCB connection **to the CS-105**, do not start a competing hub for the ESP32
 - Optional: the 4" shield, seated, DIPs not on ICSP
 - Not yet: a CAN transceiver (#3A)
+
+Do not point this firmware at the Pi. The CS-105 owns the LCC bus (CAN + Wi-Fi). JMRI watches that same hub.
 
 ## OpenLCB node ID
 

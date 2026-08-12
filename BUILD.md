@@ -24,7 +24,7 @@ idf.py --version    # must show v5.1.6
 cd ~/Git/wlcs15/Arduino_Wemos_TTgo_D1_R32_ESPDuino-32_Waveshare_4inch_OpenMRN_WiFi
 git submodule update --init --recursive
 idf.py set-target esp32
-idf.py menuconfig   # optional: WiFi SSID / JMRI hub under "D1 R32 OpenMRN WiFi node"
+idf.py menuconfig   # optional: WiFi SSID; hub is CS-105 192.168.1.27:12021
 idf.py build
 idf.py -p /dev/ttyUSB0 flash monitor
 ```

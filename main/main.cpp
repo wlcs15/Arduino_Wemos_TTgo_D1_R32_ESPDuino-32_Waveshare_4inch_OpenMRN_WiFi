@@ -37,7 +37,9 @@ extern "C" void app_main(void)
              (unsigned)((node_id >> 8) & 0xFF),
              (unsigned)(node_id & 0xFF));
 
-    ESP_LOGI(TAG, "NVS and netif ready. Hub defaults: %s:%d",
+    ESP_LOGI(TAG, "LCC hub (CS-105) %s:%d",
              CONFIG_NODE_LCC_HUB_HOST, CONFIG_NODE_LCC_HUB_PORT);
-    ESP_LOGI(TAG, "Next: wire Esp32WiFiManager + SimpleStack to the JMRI hub.");
+    ESP_LOGI(TAG, "JMRI monitor (Pi) %s:%d — connect JMRI to the CS-105, not as a second hub",
+             CONFIG_NODE_JMRI_MONITOR_HOST, CONFIG_NODE_JMRI_MONITOR_PORT);
+    ESP_LOGI(TAG, "Next: wire Esp32WiFiManager + SimpleStack to the CS-105 hub.");
 }
