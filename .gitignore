@@ -49,8 +49,10 @@ managed_components/
 dependencies.lock
 .cache/
 
-# Local Wi-Fi secrets (never commit)
+# Local Wi-Fi secrets and board wrap (never commit)
 wifi_secrets.env
+local/
+main/wifi_psk_wrap.inc
 
 # Editor / aider
 .aider*
@@ -70,6 +72,8 @@ compile_commands.json
 *.log
 *.bak
 *.swp
+__pycache__/
+*.pyc
 
 # vcpkg
 vcpkg_installed/

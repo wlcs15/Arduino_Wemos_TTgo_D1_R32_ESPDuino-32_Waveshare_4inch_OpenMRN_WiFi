@@ -37,10 +37,12 @@ Do not use the `03.00.AB.01.*` values from the registry comment as the node ID. 
 ## Wi-Fi secret
 
 - SSID **SRIF2333** (not secret).
-- PSK is your house password. It is **never** a git default.
-- First provision: local `wifi_secrets.env` + `utils/build_idf5.sh`. On first boot the PSK is wrapped with **AES-256-GCM** (mbedTLS in ESP-IDF) and stored in **NVS**. Later app flashes keep NVS.
-- Wrap key = HKDF-SHA256(flash unique id ∥ MAC ∥ `05.01.01.01.A5.01`). `#if DEBUG` shows MAC, Node ID, and flash UID on the 4" glass and on serial (never the PSK).
-- Flash unique id is preferred over MAC (MAC is on the air). If the flash chip has no UID, MAC is the fallback. This is “not plaintext,” not dump-proof.
+- PSK is your house password. It is **never** a git default and **never** compiled in as plaintext.
+- Step 1: flash a `DEBUG=1` image with `./utils/build_idf5.sh` (Grok can do this). Serial + glass show MAC, OpenLCB node ID, and SPI flash unique ID.
+- Step 2: `./utils/collect_hw_ids.py --port /dev/ttyUSB0` writes those three values to gitignored `local/hw_ids.env`.
+- Step 3: in **your** terminal, `./utils/provision_wifi_build.sh` (hidden prompt). The host encrypts with the same HKDF + AES-256-GCM as the firmware; only ciphertext is baked into `main/wifi_psk_wrap.inc` (gitignored).
+- First boot of that image decrypts with **live** chip IDs and stores the wrap in **NVS**. Later `./utils/build_idf5.sh` flashes keep NVS. Do not `erase-flash`.
+- Wrap key = HKDF-SHA256(flash unique id ∥ MAC ∥ node). The ID files plus the ciphertext can reconstruct the PSK; they stay local and out of git. This is “not plaintext in the .bin,” not dump-proof.
 
 ## Status
 

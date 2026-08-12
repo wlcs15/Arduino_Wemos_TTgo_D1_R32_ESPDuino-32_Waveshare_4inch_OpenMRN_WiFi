@@ -13,22 +13,6 @@
 
 static const char *TAG = "d1r32_openmrn_wifi";
 
-#if defined(WIFI_SSID_FROM_ENV) && defined(WIFI_PASSWORD_FROM_ENV)
-static const char *kWifiSsid = WIFI_SSID_FROM_ENV;
-static const char *kWifiPassword = WIFI_PASSWORD_FROM_ENV;
-static const bool kWifiFromEnv = true;
-#else
-static const char *kWifiSsid = CONFIG_NODE_WIFI_SSID;
-static const char *kWifiPassword = CONFIG_NODE_WIFI_PASSWORD;
-static const bool kWifiFromEnv = false;
-#endif
-
-static bool wifi_creds_ready(void)
-{
-    return kWifiSsid != nullptr && kWifiSsid[0] != '\0' &&
-           kWifiPassword != nullptr && kWifiPassword[0] != '\0';
-}
-
 extern "C" void app_main(void)
 {
     ESP_LOGI(TAG, "Arduino_Wemos_TTgo_D1_R32_ESPDuino-32_Waveshare_4inch_OpenMRN_WiFi");
@@ -77,10 +61,6 @@ extern "C" void app_main(void)
         ESP_LOGW(TAG, "WiFi PSK not available (%s)", esp_err_to_name(err));
     }
     memset(psk, 0, sizeof(psk));
-    (void)kWifiSsid;
-    (void)kWifiPassword;
-    (void)kWifiFromEnv;
-    (void)wifi_creds_ready;
 
     ESP_LOGI(TAG, "Next: wire Esp32WiFiManager + SimpleStack to the CS-105 hub.");
 }

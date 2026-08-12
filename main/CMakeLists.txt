@@ -19,15 +19,12 @@ idf_component_register(
 # Initial bring-up: DEBUG ID screen + serial. Turn off later with -DDEBUG=0.
 target_compile_definitions(${COMPONENT_LIB} PRIVATE DEBUG=1)
 
-# Compile-time secrets from the environment (utils/build_idf5.sh).
-# Never log or commit these values. CMakeCache.txt is gitignored.
-if(DEFINED ENV{WIFI_SSID} AND NOT "$ENV{WIFI_SSID}" STREQUAL "")
-    target_compile_definitions(${COMPONENT_LIB} PRIVATE
-        "WIFI_SSID_FROM_ENV=\"$ENV{WIFI_SSID}\""
-    )
-endif()
-if(DEFINED ENV{WIFI_PASSWORD} AND NOT "$ENV{WIFI_PASSWORD}" STREQUAL "")
-    target_compile_definitions(${COMPONENT_LIB} PRIVATE
-        "WIFI_PASSWORD_FROM_ENV=\"$ENV{WIFI_PASSWORD}\""
-    )
+# Host-encrypted wrap only (utils/provision_wifi_build.sh). Never a PSK here.
+set(_wifi_wrap_inc "${CMAKE_CURRENT_LIST_DIR}/wifi_psk_wrap.inc")
+if(EXISTS "${_wifi_wrap_inc}")
+    target_compile_definitions(${COMPONENT_LIB} PRIVATE WIFI_WRAP_BLOB_PRESENT=1)
+    set_source_files_properties(wifi_cred.cpp PROPERTIES OBJECT_DEPENDS "${_wifi_wrap_inc}")
+    message(STATUS "wifi_cred: baking host-encrypted wrap blob (ciphertext only)")
+else()
+    message(STATUS "wifi_cred: no wrap blob; DEBUG collect / NVS-only build")
 endif()

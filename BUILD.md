@@ -18,27 +18,43 @@ Confirm:
 idf.py --version    # must show v5.1.6
 ```
 
-## Wi-Fi secrets (do not commit, do not paste in chat)
+## Wi-Fi password (host-encrypt, ciphertext only)
+
+Do **not** create `wifi_secrets.env`. Do **not** put the PSK on the command line. Do **not** paste it into chat or `idf.py menuconfig`.
+
+Grok and any non-interactive build use `utils/build_idf5.sh`. That script never prompts and never reads a PSK.
 
 ```bash
-cd ~/Git/wlcs15/Arduino_Wemos_TTgo_D1_R32_ESPDuino-32_Waveshare_4inch_OpenMRN_WiFi
-cp wifi_secrets.env.example wifi_secrets.env
-# edit wifi_secrets.env locally — it is gitignored
-chmod 600 wifi_secrets.env
+# 1) Password-free DEBUG image (Grok can flash this)
+./utils/build_idf5.sh -p /dev/ttyUSB0 flash
+
+# 2) Harvest MAC, OpenLCB node ID, flash UID from serial
+./utils/collect_hw_ids.py --port /dev/ttyUSB0
+# writes gitignored local/hw_ids.env
+
+# 3) YOUR interactive terminal only
+./utils/provision_wifi_build.sh                 # hidden prompt, host-encrypt, build
+./utils/provision_wifi_build.sh -p /dev/ttyUSB0 flash
 ```
 
-SSID default is `SRIF2333` (public). Put the **PSK only** in `wifi_secrets.env`.
+`provision_wifi_build.sh` refuses a non-TTY, being sourced, a pre-set `WIFI_PASSWORD`, or `--password`. It writes only `main/wifi_psk_wrap.inc` (ciphertext, gitignored). The firmware decrypts with **live** chip IDs and copies the wrap into NVS. Later `./utils/build_idf5.sh` flashes keep NVS. **Do not** `erase-flash` unless you intend to provision again.
 
-First boot with that build wraps the PSK into NVS using AES-256-GCM. Later `./utils/build_idf5.sh flash` keeps NVS. **Do not** `erase-flash` unless you intend to provision again.
+Fake-data check (no hardware, no real PSK):
 
-The wrap key is HKDF-SHA256 of this module’s flash unique id + MAC, mixed with OwlThree prefix `05.01.01.01.A5`. That is not plaintext in git; it is not Flash Encryption.
+```bash
+./utils/test_wifi_wrap.sh
+```
 
-## First configure and build
+**Limit:** `local/hw_ids.env` plus the wrap file (or that one `.bin`) can reconstruct the PSK. Keep both gitignored. After NVS is written you can delete `main/wifi_psk_wrap.inc` and rebuild password-free.
+
+The wrap key is HKDF-SHA256 of flash unique id ∥ MAC ∥ node, info `05.01.01.01.A5` ∥ MAC. Not Flash Encryption.
+
+## First configure and build (no password)
 
 ```bash
 cd ~/Git/wlcs15/Arduino_Wemos_TTgo_D1_R32_ESPDuino-32_Waveshare_4inch_OpenMRN_WiFi
 git submodule update --init --recursive
-chmod +x utils/build_idf5.sh
+chmod +x utils/build_idf5.sh utils/provision_wifi_build.sh
 ./utils/build_idf5.sh set-target esp32
 ./utils/build_idf5.sh build
 ./utils/build_idf5.sh -p /dev/ttyUSB0 flash monitor

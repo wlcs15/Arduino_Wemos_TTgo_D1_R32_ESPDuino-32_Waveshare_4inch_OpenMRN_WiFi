@@ -15,11 +15,12 @@ menu "D1 R32 OpenMRN WiFi node"
             House LCC SSID. The WPA password is never a Kconfig default.
 
     config NODE_WIFI_PASSWORD
-        string "WiFi password (leave empty — use wifi_secrets.env once)"
+        string "WiFi password (leave empty — never store the PSK here)"
         default ""
         help
-            Do not put the PSK here. Provision via wifi_secrets.env; it is
-            wrapped into NVS with AES-256-GCM.
+            Do not put the PSK here. Collect board IDs from DEBUG serial,
+            then run utils/provision_wifi_build.sh in your terminal. The
+            host encrypts; only ciphertext is compiled in.
 
     config NODE_LCC_HUB_HOST
         string "LCC GridConnect hub hostname or IP (CS-105)"

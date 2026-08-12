@@ -1,30 +1,20 @@
 #!/usr/bin/env bash
-# Build with ESP-IDF 5.1.6. Wi-Fi secrets come from wifi_secrets.env only.
-# Values are never printed. Do not pass SSID/password on the command line.
+# Build with ESP-IDF 5.1.6. No secret file is read.
+#
+# Password-free (Grok or any non-interactive shell):
+#   ./utils/build_idf5.sh build
+#   ./utils/build_idf5.sh -p /dev/ttyUSB0 flash
+#
+# Collect board IDs after a DEBUG flash, then provision in YOUR terminal:
+#   ./utils/collect_hw_ids.py --port /dev/ttyUSB0
+#   ./utils/provision_wifi_build.sh
+#   ./utils/provision_wifi_build.sh -p /dev/ttyUSB0 flash
+#
+# Do not pass the Wi-Fi password on this command line.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
-
-SECRETS="$ROOT/wifi_secrets.env"
-if [[ ! -f "$SECRETS" ]]; then
-    echo "Missing $SECRETS"
-    echo "Copy wifi_secrets.env.example to wifi_secrets.env and edit it locally."
-    exit 1
-fi
-
-set -a
-# shellcheck disable=SC1090
-source "$SECRETS"
-set +a
-
-if [[ -z "${WIFI_SSID:-}" || -z "${WIFI_PASSWORD:-}" ]]; then
-    echo "WIFI_SSID and WIFI_PASSWORD must be non-empty in wifi_secrets.env"
-    exit 1
-fi
-
-# Do not echo SSID or password.
-export WIFI_SSID WIFI_PASSWORD
 
 if [[ -z "${IDF_PATH:-}" ]]; then
     export IDF_PATH="${HOME}/esp/esp-idf-v5.1.6"
@@ -40,6 +30,12 @@ fi
 
 if [[ $# -eq 0 ]]; then
     set -- build
+fi
+
+if [[ -f "$ROOT/main/wifi_psk_wrap.inc" ]]; then
+    echo "Building with host-encrypted wrap blob (ciphertext only)."
+else
+    echo "Building without a wrap blob (DEBUG collect / NVS-only)."
 fi
 
 exec idf.py "$@"

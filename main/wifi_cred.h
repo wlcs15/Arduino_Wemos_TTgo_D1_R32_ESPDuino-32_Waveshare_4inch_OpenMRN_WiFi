@@ -10,8 +10,8 @@
 extern "C" {
 #endif
 
-// Load SSID + PSK from NVS (AES-256-GCM wrap). If NVS is empty and this
-// build was made with wifi_secrets.env, wrap once and store in NVS.
+// Load SSID + PSK from NVS. If NVS is empty and this build contains a
+// host-encrypted wrap blob, decrypt with live chip IDs and store in NVS.
 esp_err_t wifi_cred_load(char *ssid, size_t ssid_len, char *psk, size_t psk_len);
 
 void wifi_hw_ids_read(uint8_t mac[6], uint8_t flash_uid[8], bool *uid_ok);
