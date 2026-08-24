@@ -12,12 +12,21 @@
 #include "nvs_flash.h"
 #include "wifi_cred.h"
 #include "wifi_sta.h"
+#include "GitVersion.h"
+#include "openlcb/SimpleNodeInfoDefs.hxx"
+
+namespace openlcb {
+extern const SimpleNodeStaticValues SNIP_STATIC_DATA = {
+    4, "OwlThree", "RR D1 R32 OpenMRN WiFi", "D1R32",
+    RR_GIT_VERSION_STR(RR_GIT_VERSION)};
+}
 
 static const char *TAG = "d1r32_openmrn_wifi";
 
 extern "C" void app_main(void)
 {
     ESP_LOGI(TAG, "Arduino_Wemos_TTgo_D1_R32_ESPDuino-32_Waveshare_4inch_OpenMRN_WiFi");
+    ESP_LOGI(TAG, "firmware %s", RR_GIT_VERSION_STR(RR_GIT_VERSION));
     ESP_LOGI(TAG, "Phase: WiFi STA + DEBUG IDs (no CAN / no OpenMRN hub yet).");
     ESP_LOGI(TAG, "OpenMRNIDF is a git submodule under components/OpenMRNIDF");
     ESP_LOGI(TAG, "Required ESP-IDF: v5.1.6  target: esp32");
