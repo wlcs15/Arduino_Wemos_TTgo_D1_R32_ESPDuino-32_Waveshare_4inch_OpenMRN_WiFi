@@ -41,4 +41,11 @@ if "$ROOT/utils/provision_wifi_build.sh" </dev/null >/dev/null 2>"$TMP/prov.err"
 fi
 grep -q 'interactive terminal' "$TMP/prov.err"
 
+echo "== provision_wifi_build.py refuses non-TTY =="
+if "$PY" "$ROOT/utils/provision_wifi_build.py" </dev/null >/dev/null 2>"$TMP/prov.py.err"; then
+    echo "FAIL: provision_wifi_build.py should refuse a pipe"
+    exit 1
+fi
+grep -q 'interactive terminal' "$TMP/prov.py.err"
+
 echo "All fake-data script tests passed."

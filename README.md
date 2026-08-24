@@ -30,17 +30,26 @@ See [BUILD.md](BUILD.md). Use **ESP-IDF v5.1.6** and `idf.py set-target esp32`.
 | `build_idf5.sh` | Grok or any shell | Activate IDF 5.1.6 and run `idf.py`. Never prompts for a password. Bakes `main/wifi_psk_wrap.inc` only if that file already exists. |
 | `collect_hw_ids.py` | Either | Parse DEBUG serial (or `--from-log`) for MAC, node ID, and flash UID. Writes gitignored `local/hw_ids.env`. Does not handle the PSK. |
 | `wifi_wrap.py` | Called by provision / tests | HKDF-SHA256 + AES-256-GCM matching `wifi_cred.cpp`. Encrypts a PSK from stdin; writes ciphertext only. `selftest` uses fake data. |
-| `provision_wifi_build.sh` | **Your interactive terminal only** | Hidden SSID/PSK prompts (not bash history, not argv). Encrypts on the host, writes `main/wifi_psk_wrap.inc`, then builds/flashes. Refuses Grok, pipes, and a pre-set `WIFI_PASSWORD`. |
+| `provision_wifi_build.sh` | **Your interactive terminal only** (Ubuntu / Git Bash) | Hidden SSID/PSK prompts (not bash history, not argv). Encrypts on the host, writes `main/wifi_psk_wrap.inc`, then builds/flashes. Refuses Grok, pipes, and a pre-set `WIFI_PASSWORD`. |
+| `provision_wifi_build.py` | **Your interactive terminal only** (Windows cmd or Ubuntu) | Same refusals and hidden prompts via `getpass`. Use `python -u`. On Windows, wrap is written here; IDF flash still needs a shell that can source ESP-IDF. |
 | `erase_all_flash.sh` | Either | Full `idf.py erase-flash` (app + NVS wrap) and shreds host wrap/`wifi_secrets.env`. Leaves `local/hw_ids.env`. Chip is blank afterward. |
-| `test_wifi_wrap.sh` | Either | Fake-data check of collect, encrypt, and the non-TTY provision refusal. Never uses the house PSK. |
+| `test_wifi_wrap.py` | Either | Same fake-data check, runs on Win11 cmd (`python -u`). Never uses the house PSK. |
+| `test_wifi_wrap.sh` | Either | Same checks plus the bash provisioner's non-TTY refusal. Never uses the house PSK. |
 
-Typical bring-up:
+Typical bring-up (from the **repo root**):
 
 ```bash
 ./utils/build_idf5.sh -p /dev/ttyUSB0 flash
-./utils/collect_hw_ids.py --port /dev/ttyUSB0
+python -u utils/collect_hw_ids.py --port /dev/ttyUSB0
 # then, in YOUR terminal only:
 ./utils/provision_wifi_build.sh -p /dev/ttyUSB0 flash
+```
+
+Windows 11 cmd (CH340 is often COM7):
+
+```bat
+python -u utils\collect_hw_ids.py --port COM7
+python -u utils\provision_wifi_build.py
 ```
 
 Wipe chip and host secret:
@@ -51,7 +60,7 @@ Wipe chip and host secret:
 
 ## Hardware you need for this phase
 
-- D1 R32 (CH340, typically `/dev/ttyUSB0`)
+- D1 R32 (CH340: `/dev/ttyUSB0` on Ubuntu, often `COM7` on Win11)
 - House Wi-Fi (SSID **SRIF2333** is public; PSK is not)
 - **TCS CS-105** at `192.168.1.27` (GridConnect TCP **12021**) — later the hub this node joins
 - **Raspberry Pi + JMRI** at `192.168.1.61` — second view only: point JMRI at the CS-105, not a competing hub

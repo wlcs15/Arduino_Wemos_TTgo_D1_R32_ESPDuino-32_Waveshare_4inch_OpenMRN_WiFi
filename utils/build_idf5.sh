@@ -41,4 +41,13 @@ else
     echo "Building without a wrap blob (DEBUG collect / NVS-only)."
 fi
 
-exec idf.py "$@"
+echo "=== idf.py $* ==="
+echo "IDF prints each compile unit. First OpenMRN build can take several minutes."
+t0="$(date +%s)"
+set +e
+idf.py "$@"
+rc=$?
+set -e
+t1="$(date +%s)"
+echo "=== idf.py finished in $((t1 - t0)) s (exit ${rc}) ==="
+exit "${rc}"

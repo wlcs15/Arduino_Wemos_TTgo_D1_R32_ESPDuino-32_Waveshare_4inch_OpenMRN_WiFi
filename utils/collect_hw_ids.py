@@ -3,8 +3,9 @@
 
 Does not handle the Wi-Fi password. Writes local/hw_ids.env only.
 
-  ./utils/collect_hw_ids.py --from-log path/to/serial.log
-  ./utils/collect_hw_ids.py --port /dev/ttyUSB0
+  python -u utils/collect_hw_ids.py --from-log path/to/serial.log
+  python -u utils/collect_hw_ids.py --port COM7
+  python -u utils/collect_hw_ids.py --port /dev/ttyUSB0
 """
 
 from __future__ import annotations
@@ -70,7 +71,10 @@ def collect_from_port(port: str, baud: int, timeout_s: float, out_path: Path) ->
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--port", help="Serial device, e.g. /dev/ttyUSB0")
+    parser.add_argument(
+        "--port",
+        help="Serial device, e.g. COM7 (Win11) or /dev/ttyUSB0 (Ubuntu)",
+    )
     parser.add_argument("--baud", type=int, default=115200)
     parser.add_argument("--timeout", type=float, default=20.0)
     parser.add_argument("--from-log", dest="from_log", help="Parse a saved log instead of opening serial")

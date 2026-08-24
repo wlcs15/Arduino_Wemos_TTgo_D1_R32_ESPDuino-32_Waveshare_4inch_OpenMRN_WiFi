@@ -24,18 +24,33 @@ Do **not** create `wifi_secrets.env`. Do **not** put the PSK on the command line
 
 Grok and any non-interactive build use `utils/build_idf5.sh`. That script never prompts and never reads a PSK.
 
+From the **repo root** (do not hard-code a user home path).
+
+Ubuntu / Git Bash:
+
 ```bash
 # 1) Password-free DEBUG image (Grok can flash this)
 ./utils/build_idf5.sh -p /dev/ttyUSB0 flash
 
 # 2) Harvest MAC, OpenLCB node ID, flash UID from serial
-./utils/collect_hw_ids.py --port /dev/ttyUSB0
+python -u utils/collect_hw_ids.py --port /dev/ttyUSB0
 # writes gitignored local/hw_ids.env
 
 # 3) YOUR interactive terminal only
 ./utils/provision_wifi_build.sh                 # hidden prompt, host-encrypt, build
 ./utils/provision_wifi_build.sh -p /dev/ttyUSB0 flash
 ```
+
+Windows 11 cmd (wrap/encrypt on this PC; IDF flash still needs a shell that can `source` ESP-IDF):
+
+```bat
+python -u utils\collect_hw_ids.py --port COM7
+python -u utils\provision_wifi_build.py
+```
+
+Then in Git Bash / Ubuntu: `./utils/build_idf5.sh -p COM7 flash` (or `/dev/ttyUSB0`).
+
+`build_idf5.sh` prints elapsed time around `idf.py`. Pass `idf.py -v` through it if you want gcc-per-file (`./utils/build_idf5.sh -v build`).
 
 `provision_wifi_build.sh` refuses a non-TTY, being sourced, a pre-set `WIFI_PASSWORD`, or `--password`. It writes only `main/wifi_psk_wrap.inc` (ciphertext, gitignored). The firmware decrypts with **live** chip IDs and copies the wrap into NVS. Later `./utils/build_idf5.sh` flashes keep NVS.
 
@@ -50,6 +65,7 @@ That is a full `erase-flash` (app + NVS) plus deletion of `main/wifi_psk_wrap.in
 Fake-data check (no hardware, no real PSK):
 
 ```bash
+python -u utils/test_wifi_wrap.py
 ./utils/test_wifi_wrap.sh
 ```
 
@@ -60,7 +76,6 @@ The wrap key is HKDF-SHA256 of flash unique id ∥ MAC ∥ node, info `05.01.01.
 ## First configure and build (no password)
 
 ```bash
-cd ~/Git/wlcs15/Arduino_Wemos_TTgo_D1_R32_ESPDuino-32_Waveshare_4inch_OpenMRN_WiFi
 git submodule update --init --recursive
 chmod +x utils/build_idf5.sh utils/provision_wifi_build.sh
 ./utils/build_idf5.sh set-target esp32

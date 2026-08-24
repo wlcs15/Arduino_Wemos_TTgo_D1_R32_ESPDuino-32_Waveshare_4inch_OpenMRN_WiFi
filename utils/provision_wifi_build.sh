@@ -3,7 +3,8 @@
 #
 # Prerequisites:
 #   1. Flash a DEBUG image with no wrap (utils/build_idf5.sh flash)
-#   2. Collect IDs: ./utils/collect_hw_ids.py --port /dev/ttyUSB0
+#   2. Collect IDs: python -u utils/collect_hw_ids.py --port COM7
+#                   python -u utils/collect_hw_ids.py --port /dev/ttyUSB0
 #   3. This script (hidden prompt) host-encrypts and bakes ciphertext only
 #
 # The PSK is not accepted as a command-line argument, is not written to a
@@ -33,7 +34,9 @@ fi
 
 if [[ ! -f "$IDS" ]]; then
     echo "Missing $IDS" >&2
-    echo "Flash the DEBUG image, then: ./utils/collect_hw_ids.py --port /dev/ttyUSB0" >&2
+    echo "Flash the DEBUG image, then:" >&2
+    echo "  python -u utils/collect_hw_ids.py --port COM7" >&2
+    echo "  python -u utils/collect_hw_ids.py --port /dev/ttyUSB0" >&2
     exit 1
 fi
 
@@ -41,6 +44,7 @@ if [[ -n "${WIFI_PASSWORD:-}" ]]; then
     echo "WIFI_PASSWORD is already set in the environment." >&2
     echo "Unset it and type the password at the hidden prompt." >&2
     echo "    unset WIFI_PASSWORD" >&2
+    echo "    Remove-Item Env:WIFI_PASSWORD" >&2
     exit 1
 fi
 
@@ -100,8 +104,13 @@ trap wipe EXIT INT TERM HUP
 echo "SSID in wrap blob: ${WIFI_SSID}"
 echo "Encrypting on the host. Only ciphertext will be compiled in."
 
-# Password on stdin so it is not on the Python argv.
-printf '%s' "$WIFI_PASSWORD" | python3 "$ROOT/utils/wifi_wrap.py" encrypt \
+# Password on stdin so it is not on the Python argv. python -u: unbuffered.
+if command -v python3 >/dev/null 2>&1; then
+  py=python3
+else
+  py=python
+fi
+printf '%s' "$WIFI_PASSWORD" | "$py" -u "$ROOT/utils/wifi_wrap.py" encrypt \
     --ids "$IDS" \
     --ssid "$WIFI_SSID" \
     --out "$WRAP_OUT"
