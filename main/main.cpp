@@ -7,6 +7,7 @@
 #include "esp_event.h"
 #include "esp_log.h"
 #include "esp_netif.h"
+#include "esp_system.h"
 #include "debug_ids.h"
 #include "ili9486_min.h"
 #include "nvs_flash.h"
@@ -29,6 +30,22 @@ extern "C" void app_main(void)
 {
     ESP_LOGI(TAG, "Arduino_Wemos_TTgo_D1_R32_ESPDuino-32_Waveshare_4inch_OpenMRN_WiFi");
     ESP_LOGI(TAG, "firmware %s", RR_GIT_VERSION_STR(RR_GIT_VERSION));
+    {
+        const esp_reset_reason_t rr = esp_reset_reason();
+        const char *why = "other";
+        switch (rr)
+        {
+        case ESP_RST_POWERON: why = "poweron"; break;
+        case ESP_RST_SW: why = "sw"; break;
+        case ESP_RST_PANIC: why = "panic"; break;
+        case ESP_RST_INT_WDT: why = "int_wdt"; break;
+        case ESP_RST_TASK_WDT: why = "task_wdt"; break;
+        case ESP_RST_WDT: why = "wdt"; break;
+        case ESP_RST_BROWNOUT: why = "brownout"; break;
+        default: break;
+        }
+        ESP_LOGI(TAG, "reset %s (%d)", why, (int)rr);
+    }
     ESP_LOGI(TAG, "Phase: WiFi STA + OpenMRN GridConnect to this JMRI hub.");
     ESP_LOGI(TAG, "OpenMRNIDF is a git submodule under components/OpenMRNIDF");
     ESP_LOGI(TAG, "Required ESP-IDF: v5.1.6  target: esp32");
@@ -53,8 +70,10 @@ extern "C" void app_main(void)
              (unsigned)((node_id >> 8) & 0xFF),
              (unsigned)(node_id & 0xFF));
 
-    ESP_LOGI(TAG, "LCC hub %s / %s :%d", CONFIG_NODE_LCC_HUB_HOST,
-             CONFIG_NODE_LCC_HUB_HOST2, CONFIG_NODE_LCC_HUB_PORT);
+    ESP_LOGI(TAG, "LCC hub mDNS _openlcb-can._tcp (fallback %s / %s :%d)",
+             CONFIG_NODE_LCC_HUB_HOST[0] ? CONFIG_NODE_LCC_HUB_HOST : "(none)",
+             CONFIG_NODE_LCC_HUB_HOST2[0] ? CONFIG_NODE_LCC_HUB_HOST2 : "(none)",
+             CONFIG_NODE_LCC_HUB_PORT);
     ESP_LOGI(TAG, "JMRI web probe %s:%d", CONFIG_NODE_JMRI_MONITOR_HOST,
              CONFIG_NODE_JMRI_WEB_PORT);
 

@@ -23,17 +23,17 @@ menu "D1 R32 OpenMRN WiFi node"
             host encrypts; only ciphertext is compiled in.
 
     config NODE_LCC_HUB_HOST
-        string "LCC GridConnect hub hostname or IP"
-        default "192.168.1.57"
+        string "Optional static LCC hub IPv4 (empty = mDNS only)"
+        default ""
         help
-            JMRI OpenLCB / GridConnect hub on this laptop (Wi-Fi IPv4).
-            Dual-home Ethernet is NODE_LCC_HUB_HOST2.
+            Leave empty. Firmware queries mDNS _openlcb-can._tcp for the
+            JMRI OpenLCB hub. A non-empty IPv4 is only a fallback.
 
     config NODE_LCC_HUB_HOST2
-        string "LCC GridConnect hub fallback IPv4 (Ethernet)"
-        default "192.168.1.82"
+        string "Optional second static LCC hub IPv4"
+        default ""
         help
-            Second address of the same JMRI hub. Empty disables fallback.
+            Second fallback after mDNS and NODE_LCC_HUB_HOST. Empty skips it.
 
     config NODE_LCC_HUB_PORT
         int "JMRI GridConnect TCP port"
