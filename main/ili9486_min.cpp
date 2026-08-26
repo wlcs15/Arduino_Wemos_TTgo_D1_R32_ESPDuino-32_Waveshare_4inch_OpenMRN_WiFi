@@ -168,6 +168,37 @@ void ili9486_fill_rect(int x, int y, int w, int h, uint16_t color)
     unlock_bus();
 }
 
+// Thick diagonal via stepped squares. Used for the FAIL "no Wi-Fi" slash.
+static void draw_slash(int x0, int y0, int x1, int y1, int t, uint16_t color)
+{
+    int dx = (x1 >= x0) ? (x1 - x0) : (x0 - x1);
+    int sx = (x0 < x1) ? 1 : -1;
+    int dy = (y1 >= y0) ? (y0 - y1) : (y1 - y0);
+    int sy = (y0 < y1) ? 1 : -1;
+    int err = dx + dy;
+    int x = x0;
+    int y = y0;
+    for (;;)
+    {
+        ili9486_fill_rect(x - t / 2, y - t / 2, t, t, color);
+        if (x == x1 && y == y1)
+        {
+            break;
+        }
+        const int e2 = err * 2;
+        if (e2 >= dy)
+        {
+            err += dy;
+            x += sx;
+        }
+        if (e2 <= dx)
+        {
+            err += dx;
+            y += sy;
+        }
+    }
+}
+
 void ili9486_draw_wifi_icon(ili9486_wifi_icon_t state)
 {
     const int x0 = kWidth - 36;
@@ -198,8 +229,12 @@ void ili9486_draw_wifi_icon(ili9486_wifi_icon_t state)
     }
     if (state == ILI9486_WIFI_ICON_FAIL)
     {
-        ili9486_fill_rect(x0 + 6, y0 + 10, 20, 3, red);
-        ili9486_fill_rect(x0 + 14, y0 + 4, 3, 16, red);
+        // Same rising bars as OK, then a slash — reads as "no Wi-Fi".
+        const uint16_t bar = 0x9800;
+        ili9486_fill_rect(x0 + 4, y0 + 20, 6, 6, bar);
+        ili9486_fill_rect(x0 + 13, y0 + 12, 6, 14, bar);
+        ili9486_fill_rect(x0 + 22, y0 + 4, 6, 22, bar);
+        draw_slash(x0 + 2, y0 + 2, x0 + 29, y0 + 25, 3, red);
         return;
     }
     // Three rising bars. Searching lights only the lowest bar.
@@ -209,6 +244,36 @@ void ili9486_draw_wifi_icon(ili9486_wifi_icon_t state)
         const uint16_t mid = (state == ILI9486_WIFI_ICON_OK) ? c : dim;
         ili9486_fill_rect(x0 + 13, y0 + 12, 6, 14, mid);
         ili9486_fill_rect(x0 + 22, y0 + 4, 6, 22, (state == ILI9486_WIFI_ICON_OK) ? c : dim);
+    }
+}
+
+void ili9486_draw_svc_icon(ili9486_svc_icon_id_t id, ili9486_svc_icon_t state)
+{
+    const int y0 = 6;
+    const int wifi_x = kWidth - 36;
+    const int jmri_x = wifi_x - 6 - 36;
+    const int lcc_x = jmri_x - 6 - 36;
+    const int x0 = (id == ILI9486_SVC_ICON_LCC) ? lcc_x : jmri_x;
+    const char *label = (id == ILI9486_SVC_ICON_LCC) ? "LCC" : "JMRI";
+    const uint16_t black = 0x0000;
+    const uint16_t dim = 0x8410;
+    const uint16_t green = 0x07E0;
+    const uint16_t red = 0xF800;
+    uint16_t fg = dim;
+    if (state == ILI9486_SVC_ICON_OK)
+    {
+        fg = green;
+    }
+    else if (state == ILI9486_SVC_ICON_FAIL)
+    {
+        fg = red;
+    }
+    ili9486_fill_rect(x0, y0, 36, 28, black);
+    const int text_x = (id == ILI9486_SVC_ICON_LCC) ? (x0 + 6) : (x0 + 2);
+    ili9486_draw_text(text_x, y0 + 10, label, fg, black, 1);
+    if (state == ILI9486_SVC_ICON_FAIL)
+    {
+        draw_slash(x0 + 2, y0 + 2, x0 + 33, y0 + 25, 3, red);
     }
 }
 

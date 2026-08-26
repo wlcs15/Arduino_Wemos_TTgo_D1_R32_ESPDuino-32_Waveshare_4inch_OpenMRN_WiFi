@@ -6,6 +6,7 @@ idf_component_register(
         "debug_ids.cpp"
         "wifi_sta.cpp"
         "svc_reach.cpp"
+        "lcc_uplink.cpp"
     INCLUDE_DIRS "."
     REQUIRES
         nvs_flash

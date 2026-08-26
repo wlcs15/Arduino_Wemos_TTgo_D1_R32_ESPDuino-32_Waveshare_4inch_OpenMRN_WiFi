@@ -13,7 +13,9 @@
 #include "wifi_cred.h"
 #include "wifi_sta.h"
 #include "GitVersion.h"
+#include "lcc_uplink.h"
 #include "openlcb/SimpleNodeInfoDefs.hxx"
+#include "svc_reach.h"
 
 namespace openlcb {
 extern const SimpleNodeStaticValues SNIP_STATIC_DATA = {
@@ -27,7 +29,7 @@ extern "C" void app_main(void)
 {
     ESP_LOGI(TAG, "Arduino_Wemos_TTgo_D1_R32_ESPDuino-32_Waveshare_4inch_OpenMRN_WiFi");
     ESP_LOGI(TAG, "firmware %s", RR_GIT_VERSION_STR(RR_GIT_VERSION));
-    ESP_LOGI(TAG, "Phase: WiFi STA + DEBUG IDs (no CAN / no OpenMRN hub yet).");
+    ESP_LOGI(TAG, "Phase: WiFi STA + OpenMRN GridConnect to this JMRI hub.");
     ESP_LOGI(TAG, "OpenMRNIDF is a git submodule under components/OpenMRNIDF");
     ESP_LOGI(TAG, "Required ESP-IDF: v5.1.6  target: esp32");
 
@@ -51,10 +53,10 @@ extern "C" void app_main(void)
              (unsigned)((node_id >> 8) & 0xFF),
              (unsigned)(node_id & 0xFF));
 
-    ESP_LOGI(TAG, "LCC hub (CS-105) %s:%d",
-             CONFIG_NODE_LCC_HUB_HOST, CONFIG_NODE_LCC_HUB_PORT);
-    ESP_LOGI(TAG, "JMRI monitor (Pi) %s:%d — connect JMRI to the CS-105, not as a second hub",
-             CONFIG_NODE_JMRI_MONITOR_HOST, CONFIG_NODE_JMRI_MONITOR_PORT);
+    ESP_LOGI(TAG, "LCC hub %s / %s :%d", CONFIG_NODE_LCC_HUB_HOST,
+             CONFIG_NODE_LCC_HUB_HOST2, CONFIG_NODE_LCC_HUB_PORT);
+    ESP_LOGI(TAG, "JMRI web probe %s:%d", CONFIG_NODE_JMRI_MONITOR_HOST,
+             CONFIG_NODE_JMRI_WEB_PORT);
 
 #if DEBUG
     (void)debug_ids_show();
@@ -84,6 +86,8 @@ extern "C" void app_main(void)
             if (st == WIFI_STA_CONNECTED)
             {
                 ESP_LOGI(TAG, "WiFi link up ip=%s rssi=%d", wifi_sta_ip(), wifi_sta_rssi());
+                lcc_uplink_start();
+                svc_reach_start();
             }
             else
             {
@@ -100,5 +104,4 @@ extern "C" void app_main(void)
         ESP_LOGW(TAG, "WiFi radio not started (no usable PSK)");
     }
 
-    ESP_LOGI(TAG, "Next: attach OpenMRN / Esp32WiFiManager GridConnect to the CS-105 hub.");
 }

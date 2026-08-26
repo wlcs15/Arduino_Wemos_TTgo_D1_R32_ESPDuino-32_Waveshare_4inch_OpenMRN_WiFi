@@ -23,28 +23,43 @@ menu "D1 R32 OpenMRN WiFi node"
             host encrypts; only ciphertext is compiled in.
 
     config NODE_LCC_HUB_HOST
-        string "LCC GridConnect hub hostname or IP (CS-105)"
-        default "192.168.1.27"
+        string "LCC GridConnect hub hostname or IP"
+        default "192.168.1.57"
         help
-            TCS CS-105 on house Wi-Fi. The D1 R32 connects here as a
-            GridConnect TCP client (not to the JMRI Pi).
+            JMRI OpenLCB / GridConnect hub on this laptop (Wi-Fi IPv4).
+            Dual-home Ethernet is NODE_LCC_HUB_HOST2.
+
+    config NODE_LCC_HUB_HOST2
+        string "LCC GridConnect hub fallback IPv4 (Ethernet)"
+        default "192.168.1.82"
+        help
+            Second address of the same JMRI hub. Empty disables fallback.
 
     config NODE_LCC_HUB_PORT
-        int "CS-105 GridConnect TCP port"
+        int "JMRI GridConnect TCP port"
         default 12021
         range 1 65535
 
     config NODE_JMRI_MONITOR_HOST
-        string "JMRI monitor host (Raspberry Pi, second view)"
-        default "192.168.1.61"
+        string "JMRI web host (icon probe)"
+        default "192.168.1.57"
         help
-            JMRI on the Compute Module. Point JMRI's OpenLCB connection at
-            the CS-105 (192.168.1.27:12021). Do not run a second hub that
-            the ESP32 also joins.
+            JMRI web server for the glass icon. Same laptop as the hub.
 
     config NODE_JMRI_MONITOR_PORT
-        int "JMRI / CS-105 monitor port (informational)"
+        int "JMRI LCC / GridConnect TCP port (icon probe)"
         default 12021
         range 1 65535
+        help
+            TCP port on the JMRI host used for the LCC icon. This is a
+            reachability check only. Do not start a second hub if the
+            CS-105 is already the layout hub.
+
+    config NODE_JMRI_WEB_PORT
+        int "JMRI web server TCP port (icon probe)"
+        default 12080
+        range 1 65535
+        help
+            JMRI Tools → Start Web Server. Used for the JMRI icon.
 
 endmenu

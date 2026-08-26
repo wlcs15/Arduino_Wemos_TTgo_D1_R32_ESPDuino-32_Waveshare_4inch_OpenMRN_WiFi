@@ -2,7 +2,7 @@
 
 OpenMRN (NMRA LCC / OpenLCB) node for the **Wemos TTgo D1 R32 / ESPDuino-32** and the Coowell / Waveshare **4" ILI9486 resistive touch** Arduino shield.
 
-This phase is **Wi-Fi STA + DEBUG bring-up** (no TWAI/CAN, OpenMRN GridConnect not attached yet). SPI DIP switches must be **D11 / D12 / D13** (this Wemos does not wire ICSP).
+This phase is **Wi-Fi STA + OpenMRN GridConnect** to this laptop's JMRI hub (no TWAI/CAN yet). SPI DIP switches must be **D11 / D12 / D13** (this Wemos does not wire ICSP).
 
 ## What is in this baseline
 
@@ -12,7 +12,7 @@ This phase is **Wi-Fi STA + DEBUG bring-up** (no TWAI/CAN, OpenMRN GridConnect n
 - First boot copies that wrap into **NVS**; later app flashes keep NVS
 - ESP-IDF STA join after unwrap, with serial status and a 3-bar icon in the upper right (searching / connected / failed)
 - OpenMRNIDF **5.1.0** submodule on ESP-IDF **v5.1.6** / `esp32`
-- Defaults: node **05.01.01.01.A5.01**, CS-105 hub `192.168.1.27:12021`, JMRI monitor `192.168.1.61` (do not use the Pi as a second hub)
+- Defaults: node **05.01.01.01.A5.01**, JMRI hub `192.168.1.57:12021` (Ethernet fallback `192.168.1.82`)
 
 ## License
 
@@ -62,8 +62,7 @@ Wipe chip and host secret:
 
 - D1 R32 (CH340: `/dev/ttyUSB0` on Ubuntu, often `COM7` on Win11)
 - House Wi-Fi (SSID **SRIF2333** is public; PSK is not)
-- **TCS CS-105** at `192.168.1.27` (GridConnect TCP **12021**) — later the hub this node joins
-- **Raspberry Pi + JMRI** at `192.168.1.61` — second view only: point JMRI at the CS-105, not a competing hub
+- **This laptop JMRI OpenLCB hub** at `192.168.1.57:12021` (Ethernet `192.168.1.82`)
 - 4" shield seated, DIPs **not** on ICSP
 - Not yet: a CAN transceiver (#3A)
 
@@ -86,4 +85,4 @@ This firmware defaults to **05.01.01.01.A5.01**. Change it in `idf.py menuconfig
 
 Initial hardware test passed: DEBUG IDs on glass and serial, host-encrypt provision, STA join of the house AP, password line and Wi-Fi icon. Tag `CLS_Wemos_Coolwell_initial_test_passed!`.
 
-Next: attach OpenMRN / `Esp32WiFiManager` GridConnect to the CS-105. CAN is still later (#3A).
+OpenMRN GridConnect TCP client joins this laptop's JMRI hub after STA is up. CAN is still later (#3A).
