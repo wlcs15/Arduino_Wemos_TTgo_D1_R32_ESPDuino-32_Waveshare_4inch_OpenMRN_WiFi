@@ -12,7 +12,7 @@ This phase is **Wi-Fi STA + OpenMRN GridConnect** to this laptop's JMRI hub (no 
 - First boot copies that wrap into **NVS**; later app flashes keep NVS
 - ESP-IDF STA join after unwrap, with serial status and a 3-bar icon in the upper right (searching / connected / failed)
 - OpenMRNIDF **5.1.0** submodule on ESP-IDF **v5.1.6** / `esp32`
-- Defaults: node **05.01.01.01.A5.01**, tag **`v1.0.0`**. JMRI hub `192.168.1.57:12021` (Ethernet fallback `192.168.1.82`; mDNS later)
+- Defaults: node **05.01.01.01.A5.01**, tag **`v1.0.0`**. Hub is mDNS `_openlcb-can._tcp` (optional static fallback empty)
 
 ## License
 
@@ -60,9 +60,9 @@ Wipe chip and host secret:
 
 ## Hardware you need for this phase
 
-- D1 R32 (CH340: `/dev/ttyUSB0` on Ubuntu, often `COM7` on Win11)
+- D1 R32 (CH340; Ubuntu `ttyUSB*` numbers swap — confirm MAC `a4:f0:0f:73:97:3c`. Opening the port with DTR resets the ESP32; `stty -F PORT -hupcl` before a serial monitor)
 - House Wi-Fi (SSID **SRIF2333** is public; PSK is not)
-- **This laptop JMRI OpenLCB hub** at `192.168.1.57:12021` (Ethernet `192.168.1.82`)
+- **This laptop JMRI OpenLCB hub** (`_openlcb-can._tcp`, TCP 12021)
 - 4" shield seated, DIPs **not** on ICSP
 - Not yet: a CAN transceiver (#3A)
 
