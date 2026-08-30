@@ -10,6 +10,8 @@
 #include "lwip/netdb.h"
 #include "lwip/sockets.h"
 #include "sdkconfig.h"
+#include "lcc_uplink.h"
+#include "SvcReachPick.h"
 #include "wifi_sta.h"
 
 static const char *TAG = "svc_reach";
@@ -57,6 +59,26 @@ static void apply_icon(ili9486_svc_icon_id_t id, bool up)
     ili9486_draw_svc_icon(id, up ? ILI9486_SVC_ICON_OK : ILI9486_SVC_ICON_FAIL);
 }
 
+static bool probe_jmri_web(const char *web_host, int web_port)
+{
+    char web_hosts[2][16];
+    const int nweb =
+        svc_reach_web_hosts(lcc_uplink_hub_ip(), web_host, web_hosts, 2);
+    int i;
+    for (i = 0; i < nweb; i++)
+    {
+        if (tcp_is_open(web_hosts[i], web_port, 1500))
+        {
+            ESP_LOGI(TAG, "JMRI web %s:%d up", web_hosts[i], web_port);
+            return true;
+        }
+    }
+    ESP_LOGI(TAG, "JMRI web %s:%d down",
+             nweb ? web_hosts[0] : (web_host[0] ? web_host : "(none)"),
+             web_port);
+    return false;
+}
+
 static void probe_task(void *arg)
 {
     (void)arg;
@@ -79,16 +101,17 @@ static void probe_task(void *arg)
             continue;
         }
 
-        const bool web = tcp_is_open(web_host, web_port, 1500);
-        ESP_LOGI(TAG, "JMRI web %s:%d %s", web_host, web_port, web ? "up" : "down");
-        apply_icon(ILI9486_SVC_ICON_JMRI, web);
+        apply_icon(ILI9486_SVC_ICON_JMRI, probe_jmri_web(web_host, web_port));
 
-        bool lcc = tcp_is_open(lcc_host, lcc_port, 1500);
-        if (!lcc && lcc_host2[0] != '\0')
+        bool static_lcc = tcp_is_open(lcc_host, lcc_port, 1500);
+        if (!static_lcc && lcc_host2[0] != '\0')
         {
-            lcc = tcp_is_open(lcc_host2, lcc_port, 1500);
+            static_lcc = tcp_is_open(lcc_host2, lcc_port, 1500);
         }
-        ESP_LOGI(TAG, "LCC %s:%d %s", lcc_host, lcc_port, lcc ? "up" : "down");
+        const bool lcc = svc_reach_lcc_icon_ok(lcc_uplink_is_attached(),
+                                               static_lcc ? 1 : 0) != 0;
+        ESP_LOGI(TAG, "LCC icon %s (uplink=%d static=%d)", lcc ? "up" : "down",
+                 lcc_uplink_is_attached(), static_lcc ? 1 : 0);
         apply_icon(ILI9486_SVC_ICON_LCC, lcc);
 
         vTaskDelay(pdMS_TO_TICKS(8000));

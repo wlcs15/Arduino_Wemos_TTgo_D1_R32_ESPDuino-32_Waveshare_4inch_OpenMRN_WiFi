@@ -182,7 +182,18 @@ static_assert(openlcb::CONFIG_FILE_SIZE <= sizeof(s_cfg),
 static openlcb::SimpleCanStack *s_stack;
 static int s_fd = -1;
 static bool s_attached;
+static char s_hub_ip[16];
 static DeviceClosedNotify s_closed(&s_fd, "jmri-hub");
+
+int lcc_uplink_is_attached(void)
+{
+    return (s_attached && s_fd >= 0) ? 1 : 0;
+}
+
+const char *lcc_uplink_hub_ip(void)
+{
+    return s_hub_ip;
+}
 
 static bool hub_host_skip(const char *host)
 {
@@ -208,6 +219,8 @@ static int try_hub_host(const char *host, int port)
     const int fd = ConnectSocket(host, port);
     if (fd >= 0)
     {
+        strncpy(s_hub_ip, host, sizeof(s_hub_ip) - 1);
+        s_hub_ip[sizeof(s_hub_ip) - 1] = '\0';
         ESP_LOGI(TAG, "hub %s:%d connected", host, port);
     }
     return fd;
@@ -285,6 +298,7 @@ static void uplink_task(void *arg)
         if (s_attached && s_fd < 0)
         {
             s_attached = false;
+            s_hub_ip[0] = '\0';
             ESP_LOGW(TAG, "hub closed, retry");
         }
         if (!s_attached && wifi_sta_state() == WIFI_STA_CONNECTED)

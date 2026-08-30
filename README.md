@@ -12,7 +12,7 @@ This phase is **Wi-Fi STA + OpenMRN GridConnect** to this laptop's JMRI hub (no 
 - First boot copies that wrap into **NVS**; later app flashes keep NVS
 - ESP-IDF STA join after unwrap, with serial status and a 3-bar icon in the upper right (searching / connected / failed)
 - OpenMRNIDF **5.1.0** submodule on ESP-IDF **v5.1.6** / `esp32`
-- Defaults: node **05.01.01.01.A5.01**, tag **`v1.0.0`**. Hub is mDNS `_openlcb-can._tcp` (optional static fallback empty)
+- Defaults: node **05.01.01.01.A5.01**, tag **`v1.0.1`**. Hub is mDNS `_openlcb-can._tcp` (optional static fallback empty)
 
 ## License
 
@@ -83,4 +83,4 @@ This firmware defaults to **05.01.01.01.A5.01**. Change it in `idf.py menuconfig
 
 ## Status
 
-Tag **`v1.0.0`** (pushed). OpenMRN GridConnect TCP client joins this laptop’s JMRI hub after STA is up. Node **05.01.01.01.A5.01**. Flash from the tag for SNIP `v1.0.0` (`How-To-Resume.txt` untracked → local `v1.0.0+`). Last hub view: STA `.8` reachable but TCP **LAST-ACK** — power-cycle or re-flash if missing in LCC Pro. CAN is still later (#3A). This board’s wrap IKM still includes node ID (unlike S3 wrap v2).
+Tag **`v1.0.1`** (pushed). OpenMRN GridConnect TCP client joins this laptop’s JMRI hub after STA is up (mDNS `_openlcb-can._tcp`, then empty Kconfig fallback). Node **05.01.01.01.A5.01**. SNIP manufacturer **OwlThree**, software **v1.0.1** (flashed 26-Aug-2026 to `/dev/ttyUSB0` after MAC `a4:f0:0f:73:97:3c`; NVS kept). `How-To-Resume.txt` is gitignored under `local/` so it does not bake `v1.0.1+`. Confirm MAC before every CH340 flash (`ttyUSB*` swaps). CAN is still later (#3A). This board’s wrap IKM still includes node ID (unlike S3 wrap v2).

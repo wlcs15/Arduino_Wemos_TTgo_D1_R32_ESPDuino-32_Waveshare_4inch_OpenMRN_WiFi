@@ -54,6 +54,10 @@ wifi_secrets.env
 local/
 main/wifi_psk_wrap.inc
 
+# Local session resume notes (not for GitHub; untracked files bake SNIP vN.N+)
+How-To-Resume.txt
+RESUME.txt
+
 # Editor / aider
 .aider*
 .vscode/
