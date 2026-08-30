@@ -27,59 +27,102 @@
 static const char *TAG = "lcc_uplink";
 
 static uint8_t s_cfg[1024];
-static off_t s_off;
+static off_t s_ram_off[4];
+static uint8_t s_ram_used[4];
+
+static int ram_slot(int fd)
+{
+    int i = fd - 3;
+    if (i < 0 || i > 3)
+    {
+        return -1;
+    }
+    return i;
+}
 
 static int ram_open(const char *path, int flags, int mode)
 {
+    int i;
     (void)path;
     (void)flags;
     (void)mode;
-    s_off = 0;
-    return 1;
+    for (i = 0; i < 4; i++)
+    {
+        if (!s_ram_used[i])
+        {
+            s_ram_used[i] = 1;
+            s_ram_off[i] = 0;
+            return i + 3;
+        }
+    }
+    s_ram_off[0] = 0;
+    return 3;
 }
 
 static int ram_close(int fd)
 {
-    (void)fd;
+    int i = ram_slot(fd);
+    if (i >= 0)
+    {
+        s_ram_used[i] = 0;
+        s_ram_off[i] = 0;
+    }
     return 0;
 }
 
 static ssize_t ram_write(int fd, const void *data, size_t size)
 {
-    (void)fd;
-    if (s_off < 0 || (size_t)s_off >= sizeof(s_cfg))
+    int i = ram_slot(fd);
+    size_t room;
+    if (i < 0 || data == nullptr)
+    {
+        return -1;
+    }
+    if (s_ram_off[i] < 0 || (size_t)s_ram_off[i] >= sizeof(s_cfg))
     {
         return 0;
     }
-    if (s_off + (off_t)size > (off_t)sizeof(s_cfg))
+    room = sizeof(s_cfg) - (size_t)s_ram_off[i];
+    if (size > room)
     {
-        size = sizeof(s_cfg) - (size_t)s_off;
+        size = room;
     }
-    memcpy(s_cfg + s_off, data, size);
-    s_off += (off_t)size;
+    memcpy(s_cfg + (size_t)s_ram_off[i], data, size);
+    s_ram_off[i] += (off_t)size;
     return (ssize_t)size;
 }
 
 static ssize_t ram_read(int fd, void *dst, size_t size)
 {
-    (void)fd;
-    if (s_off < 0 || (size_t)s_off >= sizeof(s_cfg))
+    int i = ram_slot(fd);
+    size_t room;
+    if (i < 0 || dst == nullptr)
+    {
+        return -1;
+    }
+    if (s_ram_off[i] < 0 || (size_t)s_ram_off[i] >= sizeof(s_cfg))
     {
         return 0;
     }
-    if (s_off + (off_t)size > (off_t)sizeof(s_cfg))
+    room = sizeof(s_cfg) - (size_t)s_ram_off[i];
+    if (size > room)
     {
-        size = sizeof(s_cfg) - (size_t)s_off;
+        size = room;
     }
-    memcpy(dst, s_cfg + s_off, size);
-    s_off += (off_t)size;
+    memcpy(dst, s_cfg + (size_t)s_ram_off[i], size);
+    s_ram_off[i] += (off_t)size;
     return (ssize_t)size;
 }
 
 static off_t ram_lseek(int fd, off_t offset, int whence)
 {
-    (void)fd;
-    off_t next = s_off;
+    int i = ram_slot(fd);
+    off_t next;
+    if (i < 0)
+    {
+        return -1;
+    }
+    next = s_ram_off[i];
     if (whence == SEEK_SET)
     {
         next = offset;
@@ -92,12 +135,16 @@ static off_t ram_lseek(int fd, off_t offset, int whence)
     {
         next = (off_t)sizeof(s_cfg) + offset;
     }
+    else
+    {
+        return -1;
+    }
     if (next < 0 || (size_t)next > sizeof(s_cfg))
     {
         return -1;
     }
-    s_off = next;
-    return s_off;
+    s_ram_off[i] = next;
+    return s_ram_off[i];
 }
 
 static int ram_fstat(int fd, struct stat *st)
