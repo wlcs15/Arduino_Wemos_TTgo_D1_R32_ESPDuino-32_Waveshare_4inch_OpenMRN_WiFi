@@ -41,10 +41,11 @@ menu "D1 R32 OpenMRN WiFi node"
         range 1 65535
 
     config NODE_JMRI_MONITOR_HOST
-        string "JMRI web host (icon probe)"
-        default "192.168.1.57"
+        string "Optional JMRI web IPv4 (icon probe; empty = hub IP only)"
+        default ""
         help
-            JMRI web server for the glass icon. Same laptop as the hub.
+            Leave empty. The JMRI glass icon probes the connected OpenLCB
+            hub IPv4 on NODE_JMRI_WEB_PORT. A static IPv4 is optional.
 
     config NODE_JMRI_MONITOR_PORT
         int "JMRI LCC / GridConnect TCP port (icon probe)"
