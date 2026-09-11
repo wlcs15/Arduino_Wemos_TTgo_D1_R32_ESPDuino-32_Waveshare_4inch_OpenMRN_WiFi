@@ -16,6 +16,7 @@
 #include "GitVersion.h"
 #include "lcc_uplink.h"
 #include "openlcb/SimpleNodeInfoDefs.hxx"
+#include "ResetWhy.h"
 #include "svc_reach.h"
 
 namespace openlcb {
@@ -26,25 +27,41 @@ extern const SimpleNodeStaticValues SNIP_STATIC_DATA = {
 
 static const char *TAG = "d1r32_openmrn_wifi";
 
+static void bring_up_wifi(esp_err_t cred_err, char *ssid, char *psk, size_t psk_len)
+{
+    if (cred_err != ESP_OK)
+    {
+        memset(psk, 0, psk_len);
+#if DEBUG
+        ili9486_draw_wifi_icon(ILI9486_WIFI_ICON_OFF);
+#endif
+        ESP_LOGW(TAG, "WiFi radio not started (no usable PSK)");
+        return;
+    }
+    const esp_err_t werr = wifi_sta_start(ssid, psk);
+    memset(psk, 0, psk_len);
+    if (werr != ESP_OK)
+    {
+        return;
+    }
+    const wifi_sta_state_t st = wifi_sta_wait(20000);
+    if (st == WIFI_STA_CONNECTED)
+    {
+        ESP_LOGI(TAG, "WiFi link up ip=%s rssi=%d", wifi_sta_ip(), wifi_sta_rssi());
+        lcc_uplink_start();
+        svc_reach_start();
+        return;
+    }
+    ESP_LOGW(TAG, "WiFi not associated (%s)", wifi_sta_state_name(st));
+}
+
 extern "C" void app_main(void)
 {
     ESP_LOGI(TAG, "Arduino_Wemos_TTgo_D1_R32_ESPDuino-32_Waveshare_4inch_OpenMRN_WiFi");
     ESP_LOGI(TAG, "firmware %s", RR_GIT_VERSION_STR(RR_GIT_VERSION));
     {
         const esp_reset_reason_t rr = esp_reset_reason();
-        const char *why = "other";
-        switch (rr)
-        {
-        case ESP_RST_POWERON: why = "poweron"; break;
-        case ESP_RST_SW: why = "sw"; break;
-        case ESP_RST_PANIC: why = "panic"; break;
-        case ESP_RST_INT_WDT: why = "int_wdt"; break;
-        case ESP_RST_TASK_WDT: why = "task_wdt"; break;
-        case ESP_RST_WDT: why = "wdt"; break;
-        case ESP_RST_BROWNOUT: why = "brownout"; break;
-        default: break;
-        }
-        ESP_LOGI(TAG, "reset %s (%d)", why, (int)rr);
+        ESP_LOGI(TAG, "reset %s (%d)", d1r32_reset_why((int)rr), (int)rr);
     }
     ESP_LOGI(TAG, "Phase: WiFi STA + OpenMRN GridConnect to this JMRI hub.");
     ESP_LOGI(TAG, "OpenMRNIDF is a git submodule under components/OpenMRNIDF");
@@ -95,32 +112,5 @@ extern "C" void app_main(void)
 #if DEBUG
     debug_ids_show_psk_status(err);
 #endif
-    if (err == ESP_OK)
-    {
-        const esp_err_t werr = wifi_sta_start(ssid, psk);
-        memset(psk, 0, sizeof(psk));
-        if (werr == ESP_OK)
-        {
-            const wifi_sta_state_t st = wifi_sta_wait(20000);
-            if (st == WIFI_STA_CONNECTED)
-            {
-                ESP_LOGI(TAG, "WiFi link up ip=%s rssi=%d", wifi_sta_ip(), wifi_sta_rssi());
-                lcc_uplink_start();
-                svc_reach_start();
-            }
-            else
-            {
-                ESP_LOGW(TAG, "WiFi not associated (%s)", wifi_sta_state_name(st));
-            }
-        }
-    }
-    else
-    {
-        memset(psk, 0, sizeof(psk));
-#if DEBUG
-        ili9486_draw_wifi_icon(ILI9486_WIFI_ICON_OFF);
-#endif
-        ESP_LOGW(TAG, "WiFi radio not started (no usable PSK)");
-    }
-
+    bring_up_wifi(err, ssid, psk, sizeof(psk));
 }

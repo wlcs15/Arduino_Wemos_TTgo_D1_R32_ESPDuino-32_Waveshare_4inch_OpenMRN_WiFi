@@ -10,7 +10,12 @@ if [[ -z "$LIZARD" ]]; then
     echo "lizard not on PATH" >&2
     exit 1
 fi
-"$LIZARD" -C 10 -w "$ROOT/main" "$ROOT/tests" \
+out="$("$LIZARD" -C 10 "$ROOT/main" "$ROOT/tests" \
     --exclude "$ROOT/components/*" --exclude "$ROOT/managed_components/*" \
-    --exclude "$ROOT/build/*"
-echo "OK: lizard CCN limit 10 on main/ tests/ utils/"
+    --exclude "$ROOT/build/*" 2>&1)" || true
+printf '%s\n' "$out"
+if printf '%s\n' "$out" | grep -F '!!!! Warnings' >/dev/null; then
+    echo "FAIL: lizard CCN limit 10 on main/ tests/" >&2
+    exit 1
+fi
+echo "OK: lizard CCN limit 10 on main/ tests/"
