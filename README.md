@@ -12,7 +12,7 @@ This phase is **Wi-Fi STA + OpenMRN GridConnect** to this laptop's JMRI hub (no 
 - First boot copies that wrap into **NVS**; later app flashes keep NVS
 - ESP-IDF STA join after unwrap, with serial status and a 3-bar icon in the upper right (searching / connected / failed)
 - OpenMRNIDF **5.1.0** submodule on ESP-IDF **v5.1.6** / `esp32`
-- Defaults: node **05.01.01.01.A5.01**, last **pushed** tag **`v1.0.2`**. Hub is mDNS `_openlcb-can._tcp` (static fallback empty)
+- Defaults: node **05.01.01.01.A5.01**, last **pushed** tag **`v1.0.3`**. Hub is mDNS `_openlcb-can._tcp` (static fallback empty)
 - Host QA (Ubuntu 10-Sep-2026): lizard **CCN 10** on `main/` + `tests/`; `app_main` / `wifi_cred_load` split so they stay under 10; `ResetWhy.h` + `SvcReachPick.h` llvm-cov **100%** lines. No board attached — do not flash until MAC `a4:f0:0f:73:97:3c`
 
 ## License
@@ -36,9 +36,9 @@ See [BUILD.md](BUILD.md). Use **ESP-IDF v5.1.6** and `idf.py set-target esp32`.
 | `erase_all_flash.sh` | Either | Full `idf.py erase-flash` (app + NVS wrap) and shreds host wrap/`wifi_secrets.env`. Leaves `local/hw_ids.env`. Chip is blank afterward. |
 | `test_wifi_wrap.py` | Either | Same fake-data check, runs on Win11 cmd (`python -u`). Never uses the house PSK. |
 | `test_wifi_wrap.sh` | Either | Same checks plus the bash provisioner's non-TTY refusal. Never uses the house PSK. |
-| `run_host_tests.sh` | Either | Wrap + SvcReachPick + CDI Configure + ResetWhy. No hardware. |
-| `run_lizard.sh` | Either | Fail if any function in `main/` `tests/` has CCN > 10. |
-| `run_coverage.sh` | Either | Clang llvm-cov of host headers (`SvcReachPick.h`, `ResetWhy.h`). |
+| `run_host_tests.sh` / `run_host_tests.ps1` | Ubuntu / Win11 | Wrap + SvcReachPick + CDI Configure + ResetWhy. No hardware. |
+| `run_lizard.sh` / `run_lizard.ps1` | Ubuntu / Win11 | Fail if any function in `main/` `tests/` has CCN > 10. |
+| `run_coverage.sh` / `run_coverage.ps1` | Ubuntu / Win11 | Clang llvm-cov of host headers (`SvcReachPick.h`, `ResetWhy.h`). |
 
 Typical bring-up (from the **repo root**):
 
@@ -87,4 +87,4 @@ This firmware defaults to **05.01.01.01.A5.01**. Change it in `idf.py menuconfig
 
 ## Status
 
-Tag **`v1.0.2`** (pushed). Local **`3e4108b`** (per-fd RAM config + CDI host test) is **not pushed, not tagged**. OpenMRN GridConnect joins this laptop’s JMRI hub via mDNS `_openlcb-can._tcp` (TCP **12021**). JMRI **web** is **Tools → Start Web Server** on **12080** (not a second hub). Dual-home laptop `.57` Ethernet / `.82` Wi-Fi; web HTTP 200 on both. Glass JMRI icon probes **12080**; LCC Pro listing is hub **12021**. Node **05.01.01.01.A5.01**. SNIP OwlThree (flashed 29-Aug-2026 `/dev/ttyUSB0` MAC `a4:f0:0f:73:97:3c`; NVS kept). RAM OpenLCB config uses **per-fd seeks** so LCC Pro **Configure** stays up. Confirm MAC before every CH340 flash. CAN is still later (#3A).
+Tag **`v1.0.3`** (Win11 host PowerShell scripts). Local **`3e4108b`** (per-fd RAM config + CDI host test) is on origin. OpenMRN GridConnect joins this laptop’s JMRI hub via mDNS `_openlcb-can._tcp` (TCP **12021**). JMRI **web** is **Tools → Start Web Server** on **12080** (not a second hub). Dual-home laptop `.57` Ethernet / `.82` Wi-Fi; web HTTP 200 on both. Glass JMRI icon probes **12080**; LCC Pro listing is hub **12021**. Node **05.01.01.01.A5.01**. SNIP OwlThree (flashed 29-Aug-2026 `/dev/ttyUSB0` MAC `a4:f0:0f:73:97:3c`; NVS kept). RAM OpenLCB config uses **per-fd seeks** so LCC Pro **Configure** stays up. Confirm MAC before every CH340 flash. CAN is still later (#3A).
