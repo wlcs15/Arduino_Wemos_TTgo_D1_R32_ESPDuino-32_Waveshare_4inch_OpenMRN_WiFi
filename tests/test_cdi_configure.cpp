@@ -30,9 +30,10 @@ int main(void)
     static const char truncated[] =
         "<?xml version=\"1.0\"?><cdi><identification><manufacturer>";
 
-    expect_eq(d1r32_cdi_configure_ready(cdi, (unsigned)strlen(cdi)), 1,
-              "A5.01 full CDI");
-    expect_eq(d1r32_cdi_configure_ready(truncated, (unsigned)strlen(truncated)),
+    expect_eq(d1r32_cdi_configure_ready(cdi, static_cast<unsigned>(strlen(cdi))),
+              1, "A5.01 full CDI");
+    expect_eq(d1r32_cdi_configure_ready(
+                  truncated, static_cast<unsigned>(strlen(truncated))),
               0, "truncated hides Configure");
     expect_eq(d1r32_cdi_configure_ready("", 0), 0, "empty");
 

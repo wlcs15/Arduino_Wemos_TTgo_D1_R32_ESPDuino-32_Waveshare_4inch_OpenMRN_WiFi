@@ -1,0 +1,8 @@
+# Host-only. IDF main, components/, managed_components/ are not tidied.
+Checks: 'clang-diagnostic-*,clang-analyzer-*,google-*,cert-*'
+WarningsAsErrors: 'clang-diagnostic-error,clang-analyzer-*,google-*,cert-*'
+HeaderFilterRegex: 'main/|tests/'
+FormatStyle: none
+CheckOptions:
+  - key: google-readability-braces-around-statements.ShortStatementExcept
+    value: 'false'

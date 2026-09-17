@@ -39,6 +39,7 @@ See [BUILD.md](BUILD.md). Use **ESP-IDF v5.1.6** and `idf.py set-target esp32`.
 | `run_host_tests.sh` / `run_host_tests.ps1` | Ubuntu / Win11 | Wrap + SvcReachPick + CDI Configure + ResetWhy. No hardware. |
 | `run_lizard.sh` / `run_lizard.ps1` | Ubuntu / Win11 | Fail if any function in `main/` `tests/` has CCN > 10. |
 | `run_coverage.sh` / `run_coverage.ps1` | Ubuntu / Win11 | Clang llvm-cov of host headers (`SvcReachPick.h`, `ResetWhy.h`). |
+| `run_clang_tidy.py` + `.sh` / `.ps1` | Ubuntu / Win11 | Host fail gate (tests/ + host headers). Python core; launchers only. Not IDF/OpenMRNIDF. |
 
 Typical bring-up (from the **repo root**):
 
