@@ -7,6 +7,7 @@ idf_component_register(
         "wifi_sta.cpp"
         "svc_reach.cpp"
         "lcc_uplink.cpp"
+        "can_rx_123.c"
     INCLUDE_DIRS "."
     REQUIRES
         nvs_flash
@@ -22,7 +23,7 @@ idf_component_register(
 )
 
 # Initial bring-up: DEBUG ID screen + serial. Turn off later with -DDEBUG=0.
-target_compile_definitions(${COMPONENT_LIB} PRIVATE DEBUG=1)
+target_compile_definitions(${COMPONENT_LIB} PRIVATE DEBUG=1 RR_RX123_TEST=1)
 
 set(_gv_py "${CMAKE_SOURCE_DIR}/utils/git_version.py")
 set(_gv_ver "v0.01+")
