@@ -55,8 +55,14 @@ static void bring_up_wifi(esp_err_t cred_err, char *ssid, char *psk, size_t psk_
     ESP_LOGW(TAG, "WiFi not associated (%s)", wifi_sta_state_name(st));
 }
 
+extern "C" void rr_tx123_run(void);
+
 extern "C" void app_main(void)
 {
+#if RR_TX123_TEST
+    rr_tx123_run();
+    return;
+#endif
     ESP_LOGI(TAG, "Arduino_Wemos_TTgo_D1_R32_ESPDuino-32_Waveshare_4inch_OpenMRN_WiFi");
     ESP_LOGI(TAG, "firmware %s", RR_GIT_VERSION_STR(RR_GIT_VERSION));
     {
