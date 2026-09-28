@@ -89,3 +89,17 @@ This firmware defaults to **05.01.01.01.A5.01**. Change it in `idf.py menuconfig
 ## Status
 
 Tag **`v1.0.3`** (Win11 host PowerShell scripts). Local **`3e4108b`** (per-fd RAM config + CDI host test) is on origin. OpenMRN GridConnect joins this laptop’s JMRI hub via mDNS `_openlcb-can._tcp` (TCP **12021**). JMRI **web** is **Tools → Start Web Server** on **12080** (not a second hub). Dual-home laptop `.57` Ethernet / `.82` Wi-Fi; web HTTP 200 on both. Glass JMRI icon probes **12080**; LCC Pro listing is hub **12021**. Node **05.01.01.01.A5.01**. SNIP OwlThree (flashed 29-Aug-2026 `/dev/ttyUSB0` MAC `a4:f0:0f:73:97:3c`; NVS kept). RAM OpenLCB config uses **per-fd seeks** so LCC Pro **Configure** stays up. Confirm MAC before every CH340 flash. CAN is still later (#3A).
+
+## Node ids
+
+This firmware is **05.01.01.01.A5.01**. The id is menuconfig and NVS, not a second copy in source. The CAN-shield test branches are not this node.
+
+| Node | Hardware | Where the full firmware lives | Tag |
+| --- | --- | --- | --- |
+| A5.01 | Wemos D1 R32, Wi-Fi | this repo, `fix-bugs-cls-Wemos-ESP32-and-Waveshare_4inch_touch_display` | `v1.0.4` |
+| A5.02 | Mega, wired CAN | Servo repo, Mega build (`RR_USE_KS0258` off) | existing Mega tag |
+| A5.03 | Wemos D1 R32, servo Wi-Fi | Servo repo, `wemos-d1r32` | not the CAN-shield test branches |
+| A5.04 | ESP32-S3 4.3 inch panel | `LCCControlPanelTouchscreen`, `cls_waveshare_ESP32-S3_4.3Inch_WiFi` | `v1.0.5` in that repo |
+| A5.05 | Pico 2 W, Wi-Fi | Pico repo, `main` | `v0.05` |
+| A5.06 | Pico W + 3.5 inch panel | Pico repo, `pico-w-restouch-3.5` | none yet |
+| A5.07 | RP2350-CAN | Pico repo, `RP2350-Transmit-Test` | `v1.05` is the CAN bring-up, not a retag of the node |
