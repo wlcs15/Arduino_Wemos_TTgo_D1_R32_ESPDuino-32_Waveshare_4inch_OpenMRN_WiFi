@@ -90,6 +90,7 @@ This firmware defaults to **05.01.01.01.A5.01**. Change it in `idf.py menuconfig
 
 Tag **`v1.0.3`** (Win11 host PowerShell scripts). Local **`3e4108b`** (per-fd RAM config + CDI host test) is on origin. OpenMRN GridConnect joins this laptop’s JMRI hub via mDNS `_openlcb-can._tcp` (TCP **12021**). JMRI **web** is **Tools → Start Web Server** on **12080** (not a second hub). Dual-home laptop `.57` Ethernet / `.82` Wi-Fi; web HTTP 200 on both. Glass JMRI icon probes **12080**; LCC Pro listing is hub **12021**. Node **05.01.01.01.A5.01**. SNIP OwlThree (flashed 29-Aug-2026 `/dev/ttyUSB0` MAC `a4:f0:0f:73:97:3c`; NVS kept). RAM OpenLCB config uses **per-fd seeks** so LCC Pro **Configure** stays up. Confirm MAC before every CH340 flash. CAN is still later (#3A).
 
+<<<<<<< HEAD
 ## Node ids
 
 This firmware is **05.01.01.01.A5.01**. The id is menuconfig and NVS, not a second copy in source. The CAN-shield test branches are not this node.
@@ -103,3 +104,17 @@ This firmware is **05.01.01.01.A5.01**. The id is menuconfig and NVS, not a seco
 | A5.05 | Pico 2 W, Wi-Fi | Pico repo, `main` | `v0.05` |
 | A5.06 | Pico W + 3.5 inch panel | Pico repo, `pico-w-restouch-3.5` | none yet |
 | A5.07 | RP2350-CAN | Pico repo, `RP2350-Transmit-Test` | `v1.05` is the CAN bring-up, not a retag of the node |
+=======
+## Wired CAN shield test (v1.0.5)
+
+Two local tags, one per branch. A single tag cannot point at both commits.
+
+| Tag | Branch | Commit |
+| --- | --- | --- |
+| `v1.0.5-receive` | `RP2350-Receive-Test` | `e0dc399` |
+| `v1.0.5-transmit` | `RP2350-Transmit-Test` | `19e76e1` |
+
+Hardware for both: Wemos D1 R32 plus a Waveshare RS485 CAN Shield (SN65HVD230, not an MCP2515). ESP32 TWAI at 125 kbit/s. Transmit GPIO21 (header D14), receive GPIO22 (header D15). Wi-Fi and OpenMRN stay off. The 4 inch display is not attached.
+
+The transmit image sends standard ID `0x123` with data `00 11 22 33 44 55 66 77` once a second. The receive image prints that ID. On 27-Sep-2026 the sender MAC `14:33:5c:2e:b4:d8` (`/dev/ttyUSB2`) printed `TARGET sent 0x123`, and the receiver MAC `a4:f0:0f:73:97:3c` (`/dev/ttyUSB1`) printed `TARGET received 0x123`. These images are not the A5.01 hub client. Flash the A5.01 Wi-Fi branch to put node `05.01.01.01.A5.01` back.
+>>>>>>> 6982f01 (Document the v1.0.5 CAN shield transmit and receive test.)
