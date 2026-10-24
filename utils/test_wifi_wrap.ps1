@@ -136,6 +136,9 @@ try {
     }
 
     Write-Host "All fake-data script tests passed."
+    # Explicit success code: a native check above (cmd/bash non-TTY refusal)
+    # leaves $LASTEXITCODE=1, and run_host_tests.ps1 checks it after `& script`.
+    exit 0
 } finally {
     Remove-Item -Recurse -Force $tmp -ErrorAction SilentlyContinue
 }
