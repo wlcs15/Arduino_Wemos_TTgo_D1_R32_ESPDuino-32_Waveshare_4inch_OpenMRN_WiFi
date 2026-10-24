@@ -1,2 +1,120 @@
 # Arduino_Wemos_TTgo_D1_R32_ESPDuino-32_Waveshare_4inch_OpenMRN_WiFi
-Build a new project based on OpenMRN targetting the Wemos TTgo D1 R32 ESPDuino-32 and Waveshare 4Inch Touch Display
+
+OpenMRN (NMRA LCC / OpenLCB) node for the **Wemos TTgo D1 R32 / ESPDuino-32** and the Coowell / Waveshare **4" ILI9486 resistive touch** Arduino shield.
+
+This phase is **Wi-Fi STA + OpenMRN GridConnect** to this laptop's JMRI hub (no TWAI/CAN yet). SPI DIP switches must be **D11 / D12 / D13** (this Wemos does not wire ICSP).
+
+## What is in this baseline
+
+- `DEBUG=1` ID screen and serial: MAC, OpenLCB node ID, SPI flash unique ID
+- `WIFI PASSWORD:` line — `NOT SET`, `SET (NOT SHOWN)`, or `UNWRAP FAIL` (never the PSK)
+- Host-side AES-256-GCM wrap of the house PSK; only ciphertext is compiled in
+- First boot copies that wrap into **NVS**; later app flashes keep NVS
+- ESP-IDF STA join after unwrap, with serial status and a 3-bar icon in the upper right (searching / connected / failed)
+- OpenMRNIDF **5.1.0** submodule on ESP-IDF **v5.1.6** / `esp32`
+- Defaults: node **05.01.01.01.A5.01**, last **pushed** tag **`v1.0.3`**. Hub is mDNS `_openlcb-can._tcp` (static fallback empty)
+- Host QA (Ubuntu 10-Sep-2026): lizard **CCN 10** on `main/` + `tests/`; `app_main` / `wifi_cred_load` split so they stay under 10; `ResetWhy.h` + `SvcReachPick.h` llvm-cov **100%** lines. No board attached — do not flash until MAC `a4:f0:0f:73:97:3c`
+
+## License
+
+Application code in this repository is **BSD-2-Clause** (see `LICENSE`).  
+`components/OpenMRNIDF` is atanisoft’s **5.1.0** tree plus a one-line `mdns` REQUIRES for IDF 5.1. The commit lives on this repo’s `vendor/OpenMRNIDF-5.1.0` branch (not pushed to atanisoft). License remains BSD-2-Clause.
+
+## Build
+
+See [BUILD.md](BUILD.md). Use **ESP-IDF v5.1.6** and `idf.py set-target esp32`.
+
+## Scripts (`utils/`)
+
+| Script | Who runs it | Purpose |
+|--------|-------------|---------|
+| `build_idf5.sh` | Grok or any shell | Activate IDF 5.1.6 and run `idf.py`. Never prompts for a password. Bakes `main/wifi_psk_wrap.inc` only if that file already exists. |
+| `collect_hw_ids.py` | Either | Parse DEBUG serial (or `--from-log`) for MAC, node ID, and flash UID. Writes gitignored `local/hw_ids.env`. Does not handle the PSK. |
+| `wifi_wrap.py` | Called by provision / tests | HKDF-SHA256 + AES-256-GCM matching `wifi_cred.cpp`. Encrypts a PSK from stdin; writes ciphertext only. `selftest` uses fake data. |
+| `provision_wifi_build.sh` | **Your interactive terminal only** (Ubuntu / Git Bash) | Hidden SSID/PSK prompts (not bash history, not argv). Encrypts on the host, writes `main/wifi_psk_wrap.inc`, then builds/flashes. Refuses Grok, pipes, and a pre-set `WIFI_PASSWORD`. |
+| `provision_wifi_build.py` | **Your interactive terminal only** (Windows cmd or Ubuntu) | Same refusals and hidden prompts via `getpass`. Use `python -u`. On Windows, wrap is written here; IDF flash still needs a shell that can source ESP-IDF. |
+| `erase_all_flash.sh` | Either | Full `idf.py erase-flash` (app + NVS wrap) and shreds host wrap/`wifi_secrets.env`. Leaves `local/hw_ids.env`. Chip is blank afterward. |
+| `test_wifi_wrap.py` | Either | Same fake-data check, runs on Win11 cmd (`python -u`). Never uses the house PSK. |
+| `test_wifi_wrap.sh` | Either | Same checks plus the bash provisioner's non-TTY refusal. Never uses the house PSK. |
+| `run_host_tests.sh` / `run_host_tests.ps1` | Ubuntu / Win11 | Wrap + SvcReachPick + CDI Configure + ResetWhy. No hardware. |
+| `run_lizard.sh` / `run_lizard.ps1` | Ubuntu / Win11 | Fail if any function in `main/` `tests/` has CCN > 10. |
+| `run_coverage.sh` / `run_coverage.ps1` | Ubuntu / Win11 | Clang llvm-cov of host headers (`SvcReachPick.h`, `ResetWhy.h`). |
+| `run_clang_tidy.py` + `.sh` / `.ps1` | Ubuntu / Win11 | Host fail gate (tests/ + host headers). Python core; launchers only. Not IDF/OpenMRNIDF. |
+
+Typical bring-up (from the **repo root**):
+
+```bash
+./utils/build_idf5.sh -p /dev/ttyUSB0 flash
+python -u utils/collect_hw_ids.py --port /dev/ttyUSB0
+# then, in YOUR terminal only:
+./utils/provision_wifi_build.sh -p /dev/ttyUSB0 flash
+```
+
+Windows 11 cmd (CH340 is often COM7):
+
+```bat
+python -u utils\collect_hw_ids.py --port COM7
+python -u utils\provision_wifi_build.py
+```
+
+Wipe chip and host secret:
+
+```bash
+./utils/erase_all_flash.sh -p /dev/ttyUSB0
+```
+
+## Hardware you need for this phase
+
+- D1 R32 (CH340; Ubuntu `ttyUSB*` numbers swap — confirm MAC `a4:f0:0f:73:97:3c`. Opening the port with DTR resets the ESP32; `stty -F PORT -hupcl` before a serial monitor)
+- House Wi-Fi (SSID **SRIF2333** is public; PSK is not)
+- **This laptop JMRI OpenLCB hub** (`_openlcb-can._tcp`, TCP 12021)
+- 4" shield seated, DIPs **not** on ICSP
+- Not yet: a CAN transceiver (#3A)
+
+## OpenLCB node ID
+
+OwlThree is listed in the [OpenLCB unique ID registry](https://registry.openlcb.org/uniqueidranges) as:
+
+**05.01.01.01.A5.*** — 256 IDs (`05.01.01.01.A5.00` … `05.01.01.01.A5.FF`)
+
+This firmware defaults to **05.01.01.01.A5.01**. Change it in `idf.py menuconfig` → *D1 R32 OpenMRN WiFi node*. Keep `.02` and up for more boards or the later CAN node. Do not use `03.00.AB.01.*`.
+
+## Wi-Fi secret
+
+- The PSK is **never** a git default, **never** typed into Grok, and **never** compiled in as plaintext.
+- Host wrap key = HKDF-SHA256(flash unique id ∥ MAC ∥ node), info `05.01.01.01.A5` ∥ MAC. Decrypt uses **live** chip IDs.
+- `local/hw_ids.env` plus the wrap file (or a provisioning `.bin`) can reconstruct the PSK. Both stay gitignored. This is “not plaintext in the `.bin`,” not dump-proof.
+- After NVS is written, later wrap-free `build_idf5.sh` flashes keep NVS. Do not `erase-flash` unless you intend to provision again (or run `erase_all_flash.sh`).
+
+## Status
+
+Tag **`v1.0.3`** (Win11 host PowerShell scripts). Local **`3e4108b`** (per-fd RAM config + CDI host test) is on origin. OpenMRN GridConnect joins this laptop’s JMRI hub via mDNS `_openlcb-can._tcp` (TCP **12021**). JMRI **web** is **Tools → Start Web Server** on **12080** (not a second hub). Dual-home laptop `.57` Ethernet / `.82` Wi-Fi; web HTTP 200 on both. Glass JMRI icon probes **12080**; LCC Pro listing is hub **12021**. Node **05.01.01.01.A5.01**. SNIP OwlThree (flashed 29-Aug-2026 `/dev/ttyUSB0` MAC `a4:f0:0f:73:97:3c`; NVS kept). RAM OpenLCB config uses **per-fd seeks** so LCC Pro **Configure** stays up. Confirm MAC before every CH340 flash. CAN is still later (#3A).
+
+<<<<<<< HEAD
+## Node ids
+
+This firmware is **05.01.01.01.A5.01**. The id is menuconfig and NVS, not a second copy in source. The CAN-shield test branches are not this node.
+
+| Node | Hardware | Where the full firmware lives | Tag |
+| --- | --- | --- | --- |
+| A5.01 | Wemos D1 R32, Wi-Fi | this repo, `fix-bugs-cls-Wemos-ESP32-and-Waveshare_4inch_touch_display` | `v1.0.4` |
+| A5.02 | Mega, wired CAN | Servo repo, Mega build (`RR_USE_KS0258` off) | existing Mega tag |
+| A5.03 | Wemos D1 R32, servo Wi-Fi | Servo repo, `wemos-d1r32` | not the CAN-shield test branches |
+| A5.04 | ESP32-S3 4.3 inch panel | `LCCControlPanelTouchscreen`, `cls_waveshare_ESP32-S3_4.3Inch_WiFi` | `v1.0.5` in that repo |
+| A5.05 | Pico 2 W, Wi-Fi | Pico repo, `main` | `v0.05` |
+| A5.06 | Pico W + 3.5 inch panel | Pico repo, `pico-w-restouch-3.5` | none yet |
+| A5.07 | RP2350-CAN | Pico repo, `RP2350-Transmit-Test` | `v1.05` is the CAN bring-up, not a retag of the node |
+=======
+## Wired CAN shield test (v1.0.5)
+
+Two local tags, one per branch. A single tag cannot point at both commits.
+
+| Tag | Branch | Commit |
+| --- | --- | --- |
+| `v1.0.5-receive` | `RP2350-Receive-Test` | `e0dc399` |
+| `v1.0.5-transmit` | `RP2350-Transmit-Test` | `19e76e1` |
+
+Hardware for both: Wemos D1 R32 plus a Waveshare RS485 CAN Shield (SN65HVD230, not an MCP2515). ESP32 TWAI at 125 kbit/s. Transmit GPIO21 (header D14), receive GPIO22 (header D15). Wi-Fi and OpenMRN stay off. The 4 inch display is not attached.
+
+The transmit image sends standard ID `0x123` with data `00 11 22 33 44 55 66 77` once a second. The receive image prints that ID. On 27-Sep-2026 the sender MAC `14:33:5c:2e:b4:d8` (`/dev/ttyUSB2`) printed `TARGET sent 0x123`, and the receiver MAC `a4:f0:0f:73:97:3c` (`/dev/ttyUSB1`) printed `TARGET received 0x123`. These images are not the A5.01 hub client. Flash the A5.01 Wi-Fi branch to put node `05.01.01.01.A5.01` back.
+>>>>>>> 6982f01 (Document the v1.0.5 CAN shield transmit and receive test.)

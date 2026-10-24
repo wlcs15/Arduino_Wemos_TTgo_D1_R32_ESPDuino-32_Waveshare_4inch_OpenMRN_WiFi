@@ -1,0 +1,113 @@
+# Build notes
+
+**Required ESP-IDF: v5.1.6 only.** Target is classic **esp32** (Wemos D1 R32), not esp32s3.
+
+Do not configure this tree with ESP-IDF 5.3+ or 6.x. OpenMRN does not compile cleanly on newer GCC/newlib. That is a hard constraint.
+
+## Activate the toolchain
+
+```bash
+export IDF_PATH=~/esp/esp-idf-v5.1.6
+. "$IDF_PATH/export.sh"
+# or, if you use the local alias: esp5
+```
+
+Confirm:
+
+```bash
+idf.py --version    # must show v5.1.6
+```
+
+## Wi-Fi password (host-encrypt, ciphertext only)
+
+Do **not** create `wifi_secrets.env`. Do **not** put the PSK on the command line. Do **not** paste it into chat or `idf.py menuconfig`.
+
+Grok and any non-interactive build use `utils/build_idf5.sh`. That script never prompts and never reads a PSK.
+
+From the **repo root** (do not hard-code a user home path).
+
+Ubuntu / Git Bash:
+
+```bash
+# 1) Password-free DEBUG image (Grok can flash this)
+./utils/build_idf5.sh -p /dev/ttyUSB0 flash
+
+# 2) Harvest MAC, OpenLCB node ID, flash UID from serial
+python -u utils/collect_hw_ids.py --port /dev/ttyUSB0
+# writes gitignored local/hw_ids.env
+
+# 3) YOUR interactive terminal only
+./utils/provision_wifi_build.sh                 # hidden prompt, host-encrypt, build
+./utils/provision_wifi_build.sh -p /dev/ttyUSB0 flash
+```
+
+Windows 11 cmd (wrap/encrypt on this PC; IDF flash still needs a shell that can `source` ESP-IDF):
+
+```bat
+python -u utils\collect_hw_ids.py --port COM7
+python -u utils\provision_wifi_build.py
+```
+
+Then in Git Bash / Ubuntu: `./utils/build_idf5.sh -p COM7 flash` (or `/dev/ttyUSB0`).
+
+`build_idf5.sh` prints elapsed time around `idf.py`. Pass `idf.py -v` through it if you want gcc-per-file (`./utils/build_idf5.sh -v build`).
+
+`provision_wifi_build.sh` refuses a non-TTY, being sourced, a pre-set `WIFI_PASSWORD`, or `--password`. It writes only `main/wifi_psk_wrap.inc` (ciphertext, gitignored). The firmware decrypts with **live** chip IDs and copies the wrap into NVS. Later `./utils/build_idf5.sh` flashes keep NVS.
+
+To wipe the chip **and** the host wrap (the secret):
+
+```bash
+./utils/erase_all_flash.sh -p /dev/ttyUSB0
+```
+
+That is a full `erase-flash` (app + NVS) plus deletion of `main/wifi_psk_wrap.inc`. Afterward flash a wrap-free image and provision again if you want Wi-Fi.
+
+Fake-data check (no hardware, no real PSK):
+
+```bash
+python -u utils/test_wifi_wrap.py
+./utils/test_wifi_wrap.sh
+```
+
+**Limit:** `local/hw_ids.env` plus the wrap file (or that one `.bin`) can reconstruct the PSK. Keep both gitignored. After NVS is written you can delete `main/wifi_psk_wrap.inc` and rebuild password-free.
+
+The wrap key is HKDF-SHA256 of flash unique id ∥ MAC ∥ node, info `05.01.01.01.A5` ∥ MAC. Not Flash Encryption.
+
+## First configure and build (no password)
+
+```bash
+git submodule update --init --recursive
+chmod +x utils/build_idf5.sh utils/provision_wifi_build.sh
+./utils/build_idf5.sh set-target esp32
+./utils/build_idf5.sh build
+./utils/build_idf5.sh -p /dev/ttyUSB0 flash monitor
+```
+
+## Submodules
+
+| Path | Source | License |
+|------|--------|---------|
+| `components/OpenMRNIDF` | atanisoft **5.1.0** + mdns REQUIRES, published as `vendor/OpenMRNIDF-5.1.0` on this repo | BSD-2-Clause |
+
+Application code in this repo is BSD-2-Clause (see `LICENSE`). Do not vendor a second copy of OpenMRN sources.
+
+The submodule URL is this project repo (branch `vendor/OpenMRNIDF-5.1.0`) so the mdns CMake commit is fetchable. CMake still applies `patches/OpenMRNIDF-idf51-mdns.patch` if a clean upstream checkout is missing that line.
+
+## DEBUG ID screen
+
+With `DEBUG=1` (default in `main/CMakeLists.txt`) boot paints MAC, OpenLCB node ID, and SPI flash unique ID on the 4" panel and prints the same three lines on serial. The Wi-Fi PSK is never displayed or logged.
+
+## Hardware (this phase)
+
+- Wemos TTgo D1 R32 / ESPDuino-32
+- Coowell / Waveshare 4" ILI9486 shield may stay seated
+- SPI DIP switches: **D11 / D12 / D13**, not ICSP
+- No CAN transceiver yet (WiFi GridConnect only)
+
+## Related local projects
+
+| Project | IDF | Role |
+|---------|-----|------|
+| This repo | **5.1.6** / esp32 | OpenMRN WiFi node |
+| `…/vsi5004/LCCLightingTouchscreen` | 5.1.6 / esp32s3 | Lighting UI (different glass) |
+| `…/bobscott45/esp32_lever_frame` | 6.1 | Lever frame (S3/P4 4.3") |

@@ -1,0 +1,66 @@
+menu "D1 R32 OpenMRN WiFi node"
+
+    config NODE_OPENLCB_ID
+        hex "OpenLCB unique node ID (48-bit)"
+        default 0x05010101A501
+        help
+            OwlThree registry range is 05.01.01.01.A5.* (256 IDs).
+            Default .01 is this Wemos WiFi node. Use .02+ for more boards.
+            Do not use 00.00.00.00.00.00 or anyone else's prefix.
+
+    config NODE_WIFI_SSID
+        string "WiFi SSID (not secret; PSK is not stored here)"
+        default "SRIF2333"
+        help
+            House LCC SSID. The WPA password is never a Kconfig default.
+
+    config NODE_WIFI_PASSWORD
+        string "WiFi password (leave empty — never store the PSK here)"
+        default ""
+        help
+            Do not put the PSK here. Collect board IDs from DEBUG serial,
+            then run utils/provision_wifi_build.sh in your terminal. The
+            host encrypts; only ciphertext is compiled in.
+
+    config NODE_LCC_HUB_HOST
+        string "Optional static LCC hub IPv4 (empty = mDNS only)"
+        default ""
+        help
+            Leave empty. Firmware queries mDNS _openlcb-can._tcp for the
+            JMRI OpenLCB hub. A non-empty IPv4 is only a fallback.
+
+    config NODE_LCC_HUB_HOST2
+        string "Optional second static LCC hub IPv4"
+        default ""
+        help
+            Second fallback after mDNS and NODE_LCC_HUB_HOST. Empty skips it.
+
+    config NODE_LCC_HUB_PORT
+        int "JMRI GridConnect TCP port"
+        default 12021
+        range 1 65535
+
+    config NODE_JMRI_MONITOR_HOST
+        string "Optional JMRI web IPv4 (icon probe; empty = hub IP only)"
+        default ""
+        help
+            Leave empty. The JMRI glass icon probes the connected OpenLCB
+            hub IPv4 on NODE_JMRI_WEB_PORT. A static IPv4 is optional.
+
+    config NODE_JMRI_MONITOR_PORT
+        int "JMRI LCC / GridConnect TCP port (icon probe)"
+        default 12021
+        range 1 65535
+        help
+            TCP port on the JMRI host used for the LCC icon. This is a
+            reachability check only. Do not start a second hub if the
+            CS-105 is already the layout hub.
+
+    config NODE_JMRI_WEB_PORT
+        int "JMRI web server TCP port (icon probe)"
+        default 12080
+        range 1 65535
+        help
+            JMRI Tools → Start Web Server. Used for the JMRI icon.
+
+endmenu

@@ -43,6 +43,25 @@
 build/
 Build/
 build-*/
+sdkconfig
+sdkconfig.old
+managed_components/
+dependencies.lock
+.cache/
+
+# Local Wi-Fi secrets and board wrap (never commit)
+wifi_secrets.env
+local/
+main/wifi_psk_wrap.inc
+
+# Local session resume notes (not for GitHub; untracked files bake SNIP vN.N+)
+How-To-Resume.txt
+RESUME.txt
+
+# Editor / aider
+.aider*
+.vscode/
+.idea/
 
 # CMake generated files
 CMakeFiles/
@@ -57,6 +76,8 @@ compile_commands.json
 *.log
 *.bak
 *.swp
+__pycache__/
+*.pyc
 
 # vcpkg
 vcpkg_installed/

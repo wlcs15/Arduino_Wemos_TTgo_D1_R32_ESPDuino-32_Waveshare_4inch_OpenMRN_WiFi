@@ -1,0 +1,7 @@
+I (287) d1r32_openmrn_wifi: Arduino_Wemos_TTgo_D1_R32_ESPDuino-32_Waveshare_4inch_OpenMRN_WiFi
+I (297) d1r32_openmrn_wifi: Phase: WiFi GridConnect scaffold (no CAN). DEBUG IDs on ILI9486.
+I (317) debug_ids: ==== DEBUG IDs (not the WiFi PSK) ====
+I (327) debug_ids: MAC Address: DE:AD:BE:EF:00:01
+I (337) debug_ids: OpenLCB Node ID: 05.01.01.01.A5.01
+I (347) debug_ids: SPI flash unique ID: 0123456789ABCDEF
+W (357) wifi_cred: No NVS wrap yet. Host-encrypt with utils/provision_wifi_build.sh after collecting IDs.
